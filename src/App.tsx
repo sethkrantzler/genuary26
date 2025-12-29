@@ -100,7 +100,7 @@ function BackButton() {
         zIndex: 1000,
         opacity: visible ? 1 : 0,                // fade in/out
         transition: 'opacity 0.8s ease-in-out',  // smooth animation
-        pointerEvents: visible ? 'auto' : 'none' // prevent clicks when hidden
+        pointerEvents: 'auto' // prevent clicks when hidden
       }}
     >
       Back
