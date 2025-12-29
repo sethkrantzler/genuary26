@@ -89,11 +89,13 @@ const Day1Project = () => {
         window.addEventListener('keydown', toggleGUIVisibility);
         window.addEventListener('click', () => setCylinderMode((prev) => !prev));
         window.addEventListener('touch', () => setCylinderMode((prev) => !prev));
+        window.addEventListener('drag', () => setCylinderMode((prev) => !prev));
 
     
         return () => {
             window.removeEventListener('click', () => setCylinderMode((prev) => !prev));
             window.removeEventListener('touch', () => setCylinderMode((prev) => !prev));
+            window.removeEventListener('drag', () => setCylinderMode((prev) => !prev));
             window.removeEventListener('keydown', toggleGUIVisibility);
             gui.destroy();
         };
