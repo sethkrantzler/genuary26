@@ -14,11 +14,14 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* Add Node types so you can import 'path' and 'url' */
+    "types": ["node"],
+
     /* Linting */
     "strict": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
-  },
+  }
 }
