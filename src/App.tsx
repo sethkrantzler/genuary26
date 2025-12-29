@@ -58,7 +58,9 @@ function BackButton() {
       setVisible(true);
 
       // Hide after 2 seconds of inactivity
+      //@ts-ignore
       clearTimeout(window.backButtonTimeout);
+      //@ts-ignore
       window.backButtonTimeout = setTimeout(() => setVisible(false), 2000);
     };
 
@@ -70,6 +72,7 @@ function BackButton() {
       window.removeEventListener('touch', showButton);
       window.removeEventListener('click', showButton);
       window.removeEventListener('mousemove', showButton);
+      //@ts-ignore
       clearTimeout(window.backButtonTimeout);
     };
   }, []);
@@ -108,7 +111,7 @@ function BackButton() {
 export function App() {
   return (
     <>
-        <BrowserRouter>
+        <BrowserRouter basename={import.meta.env.MODE === 'production' ? '/genuary26' : '/'}>
             <BackButton />
             <Canvas
                 camera={{

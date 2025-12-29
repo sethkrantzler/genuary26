@@ -30,7 +30,7 @@ function Circle({index, outerSize, shapeSize, geometry, material}: { index: numb
     );
   }
 
-  function Cylinder({index, outerSize, shapeSize, geometry, material}: { index: number; outerSize: number; shapeSize: number; geometry: CircleGeometry; material: Material }) {
+  function Cylinder({index, outerSize, shapeSize, geometry, material}: { index: number; outerSize: number; shapeSize: number; geometry: CylinderGeometry; material: Material }) {
     const meshRef = useRef<Mesh>(null);
     //const theta = index*2*Math.tan(shapeSize/outerSize);
     const angleIncrement = (Math.PI*2) / Math.floor(Math.PI*(outerSize/shapeSize));
@@ -196,8 +196,8 @@ const Day1Project = () => {
         <ambientLight ref={ambientRef} intensity={0.5} />
         <directionalLight ref={directionalRef} position={[5, 5, 5]} intensity={1} />
          {Array.from({ length: Math.floor(Math.PI*(outerSize/shapeSize))}, (_, i) => (
-                cylinderMode ? <Cylinder key={i} index={i} outerSize={outerSize} shapeSize={shapeSize} geometry={geometry} material={materialRef.current}/>
-                : <Circle key={i} index={i} outerSize={outerSize} shapeSize={shapeSize} geometry={geometry} material={materialRef.current}/>
+                cylinderMode ? <Cylinder key={i} index={i} outerSize={outerSize} shapeSize={shapeSize} geometry={geometry as CylinderGeometry} material={materialRef.current}/>
+                : <Circle key={i} index={i} outerSize={outerSize} shapeSize={shapeSize} geometry={geometry as CircleGeometry} material={materialRef.current}/>
             ))}
         </>
     );
