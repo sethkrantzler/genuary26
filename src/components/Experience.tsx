@@ -14,7 +14,7 @@ function Title() {
     
     useEffect(() => {
         const fontLoader = new FontLoader();
-        fontLoader.load('/fonts/helvetiker_regular.typeface.json', (font) => {
+        fontLoader.load(`${import.meta.env.BASE_URL}fonts/helvetiker_regular.typeface.json`, (font) => {
         const textGeo = new TextGeometry('GENUARY \'26', {
             font: font,
             size: 0.1 * viewport.width,

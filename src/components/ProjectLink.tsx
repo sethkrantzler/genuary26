@@ -6,7 +6,7 @@ import { FontLoader, TextGeometry } from "three/examples/jsm/Addons.js";
 // Shared material
 export const sharedMatcapMaterial = new THREE.MeshMatcapMaterial();
 const textureLoader = new THREE.TextureLoader();
-textureLoader.load('/textures/3.png', (texture) => {
+textureLoader.load(`${import.meta.env.BASE_URL}textures/3.png`, (texture) => {
   sharedMatcapMaterial.matcap = texture;
 });
 
@@ -33,7 +33,7 @@ export function ProjectLink({ day, onClick }: { day: number; onClick: () => void
 
   useEffect(() => {
     const fontLoader = new FontLoader();
-    fontLoader.load('/fonts/helvetiker_regular.typeface.json', (font) => {
+    fontLoader.load(`${import.meta.env.BASE_URL}fonts/helvetiker_regular.typeface.json`, (font) => {
       const textGeo = new TextGeometry(day.toString(), {
         font: font,
         size: 0.05 * viewport.width,
