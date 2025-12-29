@@ -51,29 +51,25 @@ const DayCode = () => {
 function BackButton() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
+    // Show button on any interaction
     const showButton = () => {
       setVisible(true);
-
-      // Hide after 2 seconds of inactivity
-      //@ts-ignore
-      clearTimeout(window.backButtonTimeout);
-      //@ts-ignore
-      window.backButtonTimeout = setTimeout(() => setVisible(false), 2000);
     };
 
-    window.addEventListener('touch', showButton);
-    window.addEventListener('click', showButton);
-    window.addEventListener('mousemove', showButton);
+    // Hide button only when "h" key is pressed
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() === 'b') {
+        setVisible((prev)=>!prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      window.removeEventListener('touch', showButton);
-      window.removeEventListener('click', showButton);
-      window.removeEventListener('mousemove', showButton);
-      //@ts-ignore
-      clearTimeout(window.backButtonTimeout);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
@@ -85,8 +81,8 @@ function BackButton() {
     <button
       onClick={(event) => {
         event.stopPropagation();
-        navigate('/')
-    }}
+        navigate('/');
+      }}
       style={{
         position: 'absolute',
         top: '10px',
@@ -98,9 +94,9 @@ function BackButton() {
         borderRadius: '5px',
         cursor: 'pointer',
         zIndex: 1000,
-        opacity: visible ? 1 : 0,                // fade in/out
+        opacity: visible ? .5 : 0,                // fade in/out
         transition: 'opacity 0.8s ease-in-out',  // smooth animation
-        pointerEvents: 'auto' // prevent clicks when hidden
+        pointerEvents: visible ? 'auto' : 'none' // prevent clicks when hidden
       }}
     >
       Back
