@@ -3,6 +3,7 @@ import { Html } from '@react-three/drei';
 import { AmbientLight, CircleGeometry, Color, CylinderGeometry, DirectionalLight, DoubleSide, Material, MathUtils, Mesh, MeshBasicMaterial, MeshStandardMaterial } from 'three';
 import GUI from 'lil-gui';
 import { useFrame, useThree } from '@react-three/fiber';
+import { PromptHint } from '../../components/PromptHint';
 
 function Circle({index, outerSize, shapeSize, geometry, material}: { index: number; outerSize: number; shapeSize: number; geometry: CircleGeometry; material: Material }) {
     const meshRef = useRef<Mesh>(null);
@@ -68,13 +69,6 @@ const Day1Project = () => {
     const materialRef = useRef(new MeshStandardMaterial({ color: 'white', side: DoubleSide, metalness:0, roughness:0.5}));
     const ambientRef = useRef<AmbientLight>();
     const directionalRef = useRef<DirectionalLight>();
-    const [showHint, setShowHint] = React.useState(true);
-
-    useEffect(() => {
-        const timer = setTimeout(() => setShowHint(false), 3000); // hide after 3s
-        return () => clearTimeout(timer);
-    }, []);
-
     
     useEffect(() => {
         const gui = new GUI();
@@ -165,36 +159,7 @@ const Day1Project = () => {
 
     return (
         <>
-        <Html center>
-            <h1
-                style={{ 
-                    textAlign: 'center',
-                    opacity: showHint ? 1 : 0,
-                    transition: 'opacity 1s ease-out',
-                    color: 'white',
-                    fontSize: '18px',           // scales with viewport
-                    fontFamily: 'Arial, sans-serif', // cleaner font
-                    pointerEvents: 'none',
-                    width: '100vw'
-                  }}              
-            >
-                ONE COLOR ONE SHAPE
-            </h1>
-            <h2
-                style={{ 
-                    textAlign: 'center',
-                    opacity: showHint ? 1 : 0,
-                    transition: 'opacity 2.5s ease-out',
-                    color: 'white',
-                    fontSize: '14px',           // scales with viewport
-                    fontFamily: 'Arial, sans-serif', // cleaner font
-                    pointerEvents: 'none',
-                    width: '100vw'
-                  }}              
-            >
-                TAP TO CHANGE STYLE
-            </h2>
-        </Html>
+        <PromptHint prompt={'one color one shape'} hint={'tap to change style'}/>
         <ambientLight ref={ambientRef} intensity={0.5} />
         <directionalLight ref={directionalRef} position={[5, 5, 5]} intensity={1} />
          {Array.from({ length: Math.floor(Math.PI*(outerSize/shapeSize))}, (_, i) => (
