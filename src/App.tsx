@@ -38,7 +38,6 @@ const DayCode = () => {
     if (!ProjectComponent) {
         return (
             <Html center>
-                <div>Loading...</div>
             </Html>
         );
     }

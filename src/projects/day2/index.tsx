@@ -107,7 +107,7 @@ function GearChain() {
 }
 
 function Ball() {
-    const [ref, api] = useSphere(() => ({
+    const [ref, api] = useSphere<THREE.Mesh>(() => ({
       mass: 1,
       position: [0, 8, 0], // start above ramps
       velocity: [-1.5, 0, 0], // initial push to the right
@@ -143,7 +143,7 @@ function Ball() {
   
   // Sloping ramp (wood-like, with bounce)
   function Ramp({ position, rotation }: { position: [number, number, number]; rotation: [number, number, number] }) {
-    const [ref] = useBox(() => ({
+    const [ref] = useBox<THREE.Mesh>(() => ({
       type: 'Static',
       position,
       rotation,
