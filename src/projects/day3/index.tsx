@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Html, OrbitControls } from '@react-three/drei';
 import { PromptHint } from '../../components/PromptHint';
 import { useFrame, useThree } from '@react-three/fiber';
@@ -40,40 +40,69 @@ function FibonacciCircle({ number, removeMaterial }: { number: number; removeMat
     );
 }
 
-
 const Day3Project = () => {
-    const {scene} = useThree();
-    const [removeMaterial, setRemoveMaterial] = React.useState(false);
-    const scale = 0.015;
+  const { scene } = useThree();
+  const [removeMaterial, setRemoveMaterial] = React.useState(false);
+  const controlsRef = useRef<any>(null);
+  const scale = 0.015;
 
-    useEffect(() => {
-        window.addEventListener('click', () => setRemoveMaterial((prev) => !prev));
-        window.addEventListener('touch', () => setRemoveMaterial((prev) => !prev));
-        window.addEventListener('drag', () => setRemoveMaterial((prev) => !prev));
+  // Toggle material on tap/click
+  useEffect(() => {
+    const toggle = () => setRemoveMaterial(prev => !prev);
 
-    
-        return () => {
-            window.removeEventListener('click', () => setRemoveMaterial((prev) => !prev));
-            window.removeEventListener('touch', () => setRemoveMaterial((prev) => !prev));
-            window.removeEventListener('drag', () => setRemoveMaterial((prev) => !prev));
-        };
-    }, []); 
+    window.addEventListener('click', toggle);
 
-    useEffect(() => {
-        scene.background = new Color('tan');
-    }
-    , []);
+    return () => {
+      window.removeEventListener('click', toggle);
+    };
+  }, []);
 
+  // Set background
+  useEffect(() => {
+    scene.background = new Color('tan');
+  }, [scene]);
 
-    return (
-        <>
-            {Array.from({ length: 1000}, (_, i) => (
-                <FibonacciCircle key={i} number={i*scale} removeMaterial={removeMaterial} />
-            ))}
-            <OrbitControls />
-            <PromptHint prompt={'Fibonacci'} hint={'tap to change style'} color={'black'}/>
-        </>
-    );
+  // Double‑tap / double‑click reset
+  useEffect(() => {
+    let lastTap = 0;
+
+    const handleTap = () => {
+      const now = Date.now();
+      const delta = now - lastTap;
+
+      if (delta < 300 && controlsRef.current) {
+        controlsRef.current.reset();
+      }
+
+      lastTap = now;
+    };
+
+    window.addEventListener('click', handleTap);
+
+    return () => {
+      window.removeEventListener('click', handleTap);
+    };
+  }, []);
+
+  return (
+    <>
+      {Array.from({ length: 1000 }, (_, i) => (
+        <FibonacciCircle
+          key={i}
+          number={i * scale}
+          removeMaterial={removeMaterial}
+        />
+      ))}
+
+      <OrbitControls ref={controlsRef} />
+
+      <PromptHint
+        prompt={'Fibonacci'}
+        hint={'tap to change style / double tap to reset view'}
+        color={'blue'}
+      />
+    </>
+  );
 };
 
 export default Day3Project;
