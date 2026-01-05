@@ -173,7 +173,7 @@ const shapeModes = [
                 m.rotation.x = base + Math.round(delta / Math.PI) * Math.PI;
     
                 // Cooldown
-                gsap.delayedCall(0.3, () => {
+                gsap.delayedCall(1, () => {
                   m.userData.flipping = false;
                 });
               },
