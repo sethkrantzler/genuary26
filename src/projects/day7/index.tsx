@@ -1,14 +1,12 @@
 import React from 'react';
 import { Html } from '@react-three/drei';
+import { PromptHint } from '../../components/PromptHint';
 
 const Day7Project = () => {
     return (
-        <Html position={[0, 0, 0]} center>
-            <div style={{ color: 'black', background: 'white', padding: '10px', borderRadius: '5px' }}>
-                <h1>Project for Day 7</h1>
-                <p>This is an HTML overlay rendered inside the 3D scene.</p>
-            </div>
-        </Html>
+        <>
+            <PromptHint prompt={"Boolean Algebra"} color="Red" />
+        </>
     );
 };
 
