@@ -42,42 +42,71 @@ function Title() {
         if (!textRef.current) return;
     
         const t = clock.getElapsedTime();
-        textRef.current.rotation.y = Math.sin(t * 2) * 0.2; // amplitude 0.2 rad (~11°)
+        textRef.current.rotation.y = Math.sin(t * 2) * 0.2;
         textRef.current.rotation.x = Math.sin(t * 1.5) * 0.05;
         textRef.current.rotation.z = Math.cos(t * 1.5) * 0.05;
     
-        const b = (Math.sin(t*0.25) + 1) / 2; // input in [0,1]
+        const b = (Math.sin(t*0.25) + 1) / 2;
         const s = smoothstepRange(b, 0, 1, 0.005, 0.6);
       
         scene.background = new THREE.Color(s, s, s);      
     });
     
     return (
-        <mesh position={[0, (viewport.height/2) - 0.5, 0]} ref={textRef} geometry={geometry} material={sharedMatcapMaterial} onClick={() => window.open('https://genuary.art', '_blank')} />
+        <mesh
+            position={[0, (viewport.height/2) - 0.5, 0]}
+            ref={textRef}
+            geometry={geometry}
+            material={sharedMatcapMaterial}
+            onClick={() => window.open('https://genuary.art', '_blank')}
+        />
     );
 }
 
 const Experience = () => {
-    const { scene } = useThree();
+    const { camera } = useThree();
     const navigate = useNavigate();
 
-    const handleClick = (day: number) => {
-        navigate(`/${day}`); // Navigate to the route for the clicked day
-    };
+    // ⭐ Create visitedSketches cookie if missing
+    useEffect(() => {
+        const existing = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("visitedSketches="));
 
+        if (!existing) {
+            // initialize with an empty array
+            document.cookie = `visitedSketches=${JSON.stringify([])}; path=/; max-age=31536000`;
+        }
+    }, []);
+
+    // Reset camera on mount
+    useEffect(() => {
+      camera.position.set(0, 0, 5);
+      camera.rotation.set(0, 0, 0);
+      camera.lookAt(0, 0, 0);
+    }, [camera]);
+  
+    const handleClick = (day: number) => {
+      navigate(`/${day}`);
+    };
+  
     return (
-        <>
-            <directionalLight
-                position={[5, 1, 8]}
-                intensity={1.5}
-                castShadow
-            />
-            <ambientLight intensity={0.3} />
-            <Title/>
-            {Array.from({ length: 31 }, (_, i) => (
-                <ProjectLink key={i} day={i+1} onClick={() => handleClick(i + 1)} />
-            ))}
-        </>
+      <>
+        <directionalLight
+          position={[5, 1, 8]}
+          intensity={1.5}
+          castShadow
+        />
+        <ambientLight intensity={0.3} />
+        <Title />
+        {Array.from({ length: 31 }, (_, i) => (
+          <ProjectLink
+            key={i}
+            day={i + 1}
+            onClick={() => handleClick(i + 1)}
+          />
+        ))}
+      </>
     );
 };
 

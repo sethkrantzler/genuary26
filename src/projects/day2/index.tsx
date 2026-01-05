@@ -5,6 +5,7 @@ import { Physics, useBox, useSphere } from '@react-three/cannon';
 import * as THREE from 'three';
 import { PromptHint } from '../../components/PromptHint';
 import { CanvasTexture } from 'three';
+import { CompletedSketch } from '../../utils/utils';
 
 // Utility: generate gear shape points
 function createGearShape(radius: number, teeth: number, toothDepth: number) {
@@ -270,6 +271,7 @@ const Day2Project = () => {
 
   return (
     <>
+      <CompletedSketch day={2} />
       <ambientLight intensity={0.6} />
       <directionalLight position={[0, 5, 10]} intensity={1.25} />
       <Environment preset="warehouse"/>

@@ -42,6 +42,11 @@ export function fibTable() {
   return [...fibs]; // safe copy
 }
 
+// Simple noise function for stagger
+export function noise(x: number, y: number) {
+  return (Math.sin(x * 12.9898 + y * 78.233) * 43758.5453) % 1;
+}
+
 export const MicroFontLetterMap = {
   A: [
     [0,1,1],
@@ -275,4 +280,31 @@ export function MicroFontLetter({
       )}
     </group>
   );
+}
+
+export function CompletedSketch({ day }: { day: number }) {
+  useEffect(() => {
+    // Read cookie
+    const raw = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("visitedSketches="));
+
+    let visited: number[] = [];
+
+    try {
+      if (raw) {
+        visited = JSON.parse(raw.split("=")[1]);
+      }
+    } catch {
+      visited = [];
+    }
+
+    // Add day if missing
+    if (!visited.includes(day)) {
+      const updated = [...visited, day];
+      document.cookie = `visitedSketches=${JSON.stringify(updated)}; path=/; max-age=31536000`;
+    }
+  }, [day]);
+
+  return null;
 }

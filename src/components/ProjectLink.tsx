@@ -1,23 +1,108 @@
 import * as THREE from "three";
-import React, { useState, useEffect, useRef } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import React, { useState, useEffect, useRef } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
 import { FontLoader, TextGeometry } from "three/examples/jsm/Addons.js";
+import gsap from "gsap";
 
-// Shared material
+// Shared matcap for text
 export const sharedMatcapMaterial = new THREE.MeshMatcapMaterial();
 const textureLoader = new THREE.TextureLoader();
 textureLoader.load(`${import.meta.env.BASE_URL}textures/3.png`, (texture) => {
   sharedMatcapMaterial.matcap = texture;
 });
 
+// ---------------------------
+// SHARED SHAPE GEOMETRIES
+// ---------------------------
+
+// Proper 5-point star in 2D
+const starShape = new THREE.Shape();
+const outerRadius = 0.6;
+const innerRadius = 0.3;
+const numPoints = 5;
+
+for (let i = 0; i < numPoints * 2; i++) {
+  const isOuter = i % 2 === 0;
+  const r = isOuter ? outerRadius : innerRadius;
+  const angle = (i * Math.PI) / numPoints - Math.PI / 2;
+  const x = Math.cos(angle) * r;
+  const y = Math.sin(angle) * r;
+  if (i === 0) starShape.moveTo(x, y);
+  else starShape.lineTo(x, y);
+}
+starShape.closePath();
+
+const starGeometry = new THREE.ExtrudeGeometry(starShape, {
+  depth: 0.05,
+  bevelEnabled: true,
+  bevelThickness: 0.02,
+  bevelSize: 0.02,
+  bevelSegments: 2,
+});
+
+const diskGeometry = new THREE.CircleGeometry(0.55, 3);
+const diamondGeometry = new THREE.CircleGeometry(0.5, 4);
+
+// ---------------------------
+// SHARED MATERIALS
+// ---------------------------
+const goldMaterial = new THREE.MeshStandardMaterial({
+  color: new THREE.Color("#FFD700"),
+  metalness: 1,
+  roughness: 0.2,
+});
+
+const blueMaterial = new THREE.MeshStandardMaterial({
+  color: new THREE.Color("#50C878"),
+  metalness: 0.6,
+  roughness: 0.4,
+});
+
+const silverMaterial = new THREE.MeshStandardMaterial({
+  color: new THREE.Color("#fc8b8f"),
+  metalness: 0.3,
+  roughness: 0.4,
+});
+
+// ---------------------------
+// COOKIE HELPER
+// ---------------------------
+function getVisitedSketches(): number[] {
+  try {
+    const raw = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("visitedSketches="));
+    if (!raw) return [];
+    return JSON.parse(raw.split("=")[1]);
+  } catch {
+    return [];
+  }
+}
+
 export function ProjectLink({ day, onClick }: { day: number; onClick: () => void }) {
-  const textRef = useRef<THREE.Mesh>(null);
+  const textRef = useRef<THREE.Group>(null);
+  const lastTriggerRef = useRef<number | null>(null);
+  const isAnimating = useRef(false);
+
+  // GSAP-controlled rotation values
+  const spinX = useRef(0);
+  const spinY = useRef(0);
+  const spinZ = useRef(0);
+
+  // GSAP-controlled squash/stretch
+  const spinScale = useRef(1);
+
   const boxRef = useRef<THREE.Mesh>(null);
+  const shapeRef = useRef<THREE.Mesh>(null);
+
   const [geometry, setGeometry] = useState<TextGeometry | undefined>(undefined);
   const [boxGeometry, setBoxGeometry] = useState<THREE.BoxGeometry | undefined>(undefined);
 
   const { viewport } = useThree();
 
+  // ---------------------------
+  // GRID POSITIONING
+  // ---------------------------
   const rows = 6;
   const cols = Math.ceil(31 / rows);
 
@@ -31,65 +116,205 @@ export function ProjectLink({ day, onClick }: { day: number; onClick: () => void
   const x = marginLeft + (col - cols / 2) * ((viewport.width - paddingX * 2) / cols);
   const y = marginTop + (rows / 2 - row) * ((viewport.height - paddingY * 2) / rows);
 
+  // ---------------------------
+  // LOAD TEXT GEOMETRY
+  // ---------------------------
   useEffect(() => {
     const fontLoader = new FontLoader();
-    fontLoader.load(`${import.meta.env.BASE_URL}fonts/helvetiker_regular.typeface.json`, (font) => {
-      const textGeo = new TextGeometry(day.toString(), {
-        font: font,
-        size: 0.05 * viewport.width,
-        depth: 0.0025 * viewport.width,
-        curveSegments: 12,
-        bevelEnabled: true,
-        bevelThickness: 0.03,
-        bevelSize: 0.02,
-        bevelOffset: 0,
-        bevelSegments: 5
-      });
+    fontLoader.load(
+      `${import.meta.env.BASE_URL}fonts/helvetiker_regular.typeface.json`,
+      (font) => {
+        const textGeo = new TextGeometry(day.toString(), {
+          font,
+          size: 0.05 * viewport.width,
+          depth: 0.0025 * viewport.width,
+          curveSegments: 12,
+          bevelEnabled: true,
+          bevelThickness: 0.03,
+          bevelSize: 0.02,
+          bevelOffset: 0,
+          bevelSegments: 5,
+        });
 
-      textGeo.computeBoundingBox();
-      if (textGeo.boundingBox) {
-        const center = new THREE.Vector3();
-        textGeo.boundingBox.getCenter(center);
-        textGeo.translate(-center.x, -center.y, -center.z);
+        textGeo.computeBoundingBox();
+        if (textGeo.boundingBox) {
+          const center = new THREE.Vector3();
+          textGeo.boundingBox.getCenter(center);
+          textGeo.translate(-center.x, -center.y, -center.z);
 
-        // Create invisible box geometry slightly larger than text
-        const size = new THREE.Vector3();
-        textGeo.boundingBox.getSize(size);
-        const boxGeo = new THREE.BoxGeometry(size.x * 1.2, size.y, size.z * 1.2); // scale factors for padding
-        setBoxGeometry(boxGeo);
+          const size = new THREE.Vector3();
+          textGeo.boundingBox.getSize(size);
+
+          const boxGeo = new THREE.BoxGeometry(size.x * 1.2, size.y, size.z * 1.2);
+          setBoxGeometry(boxGeo);
+        }
+
+        setGeometry(textGeo);
       }
+    );
+  }, [day, viewport.width]);
 
-      setGeometry(textGeo);
-    });
-  }, [day]);
+  // ---------------------------
+  // DETERMINE SHAPE TYPE
+  // ---------------------------
+  const visited = getVisitedSketches();
+  const isVisited = visited.includes(day);
 
+  const now = new Date();
+  const sketchDate = new Date(2026, 0, day);
+  const isAvailable = now >= sketchDate;
+
+  let shapeType: "star" | "disk" | "diamond";
+  if (isVisited) shapeType = "star";
+  else if (isAvailable) shapeType = "disk";
+  else shapeType = "diamond";
+
+  const shapeGeometry =
+    shapeType === "star" ? starGeometry : shapeType === "disk" ? diskGeometry : diamondGeometry;
+
+  const shapeMaterial =
+    shapeType === "star" || sketchDate.getDate() === now.getDate()
+      ? goldMaterial
+      : shapeType === "disk"
+      ? blueMaterial
+      : silverMaterial;
+
+  // ---------------------------
+  // WOBBLE ANIMATION
+  // ---------------------------
   useFrame(({ clock }) => {
     if (!textRef.current) return;
 
+    if (isAnimating.current) {
+      // Apply GSAP-driven rotation + squash/stretch
+      textRef.current.rotation.x = spinX.current;
+      textRef.current.rotation.y = spinY.current;
+      textRef.current.rotation.z = spinZ.current;
+      textRef.current.scale.set(spinScale.current, spinScale.current, spinScale.current);
+      return;
+    }
+
+    // Normal wobble
     const t = clock.getElapsedTime();
+    textRef.current.rotation.y = Math.sin(t * 2 + day) * 0.2;
+    textRef.current.rotation.x = Math.sin(t * 1.5 + day) * 0.05;
+    textRef.current.rotation.z = Math.cos(t * 1.5 + day) * 0.05;
 
-    // Wobble around Y axis using sine wave
-    textRef.current.rotation.y = Math.sin(t * 2+day) * 0.2; // amplitude 0.2 rad (~11°)
-
-    // Optional: small subtle wobble on X/Z too
-    textRef.current.rotation.x = Math.sin(t * 1.5+day) * 0.05;
-    textRef.current.rotation.z = Math.cos(t * 1.5+day) * 0.05;
+    textRef.current.scale.set(1, 1, 1);
   });
 
+  // ---------------------------
+  // SPIN TRIGGER
+  // ---------------------------
+  useFrame(() => {
+    if (!textRef.current) return;
+
+    const now = new Date();
+    const currentSecond = now.getSeconds();
+    const triggerSecond = day % 60;
+
+    if (currentSecond === triggerSecond && lastTriggerRef.current !== currentSecond) {
+      lastTriggerRef.current = currentSecond;
+
+      const spinDuration = 1.5;
+
+      // Compute wobble targets at end of spin
+      const endTime = performance.now() * 0.001 + spinDuration;
+
+      const wobbleX = Math.sin(endTime * 1.5 + day) * 0.05;
+      const wobbleY = Math.sin(endTime * 2 + day) * 0.2;
+      const wobbleZ = Math.cos(endTime * 1.5 + day) * 0.05;
+
+      isAnimating.current = true;
+
+      // Spin Z (full rotation + wobble alignment)
+      gsap.fromTo(
+        spinZ,
+        { current: textRef.current.rotation.z },
+        {
+          current: wobbleZ + Math.PI * 2,
+          duration: spinDuration,
+          ease: "elastic.out(1.03, 0.75)",
+          onComplete: () => {
+            isAnimating.current = false;
+          },
+        }
+      );
+
+      // Blend X/Y to wobble targets
+      gsap.fromTo(
+        spinX,
+        { current: textRef.current.rotation.x },
+        {
+          current: wobbleX,
+          duration: spinDuration,
+          ease: "elastic.out(1.03, 0.75)",
+        }
+      );
+
+      gsap.fromTo(
+        spinY,
+        { current: textRef.current.rotation.y },
+        {
+          current: wobbleY,
+          duration: spinDuration,
+          ease: "elastic.out(1.03, 0.75)",
+        }
+      );
+
+      // Squash & stretch
+      gsap.fromTo(
+        spinScale,
+        { current: 1 },
+        {
+          current: 1.1,
+          duration: 0.15,
+          yoyo: true,
+          repeat: 1,
+          ease: "power2.out",
+        }
+      );
+    }
+
+    if (currentSecond !== lastTriggerRef.current) {
+      lastTriggerRef.current = null;
+    }
+  });
+
+  // ---------------------------
+  // GATE RENDER UNTIL TEXT READY
+  // ---------------------------
+  const ready = geometry && boxGeometry;
+  if (!ready) return null;
 
   return (
-    <group position={[x, y, 0]}>
-      {geometry && (
-        <mesh ref={textRef} geometry={geometry} material={sharedMatcapMaterial} />
-      )}
-      {boxGeometry && (
-        <mesh
-          ref={boxRef}
-          geometry={boxGeometry}
-          onClick={onClick}
-          material={new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 })}
-        />
-      )}
+    <group ref={textRef} position={[x, y, 0]}>
+      {/* BACKGROUND SHAPE */}
+      <mesh
+        ref={shapeRef}
+        geometry={shapeGeometry}
+        material={shapeMaterial}
+        position={[0, 0, -0.01]}
+        rotation={
+          shapeType === "diamond"
+            ? [0, 0, Math.PI / 2]
+            : shapeType === "star"
+            ? [0, 0, Math.PI]
+            : [0, 0, 0]
+        }
+        scale={0.12 * viewport.width}
+      />
+
+      {/* TEXT */}
+      <mesh geometry={geometry!} material={sharedMatcapMaterial} />
+
+      {/* CLICK BOX */}
+      <mesh
+        ref={boxRef}
+        geometry={boxGeometry!}
+        onClick={onClick}
+        material={new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 })}
+      />
     </group>
   );
 }

@@ -3,7 +3,7 @@ import { useThree } from "@react-three/fiber";
 import { useEffect } from "react";
 import { PromptHint } from "../../components/PromptHint";
 import { OrbitControls } from "@react-three/drei";
-import { MicroFontLetterMap, MicroFontLetter } from "../../utils/utils";
+import { MicroFontLetterMap, MicroFontLetter, CompletedSketch } from "../../utils/utils";
 import React from "react";
 import gsap from "gsap";
 
@@ -219,7 +219,7 @@ const onRotate = React.useCallback((ref) => {
           );
         })}
       </group>
-
+      <CompletedSketch day={5} />
       <OrbitControls />
     </>
   );

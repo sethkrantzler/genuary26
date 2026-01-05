@@ -4,6 +4,7 @@ import { AmbientLight, CircleGeometry, Color, CylinderGeometry, DirectionalLight
 import GUI from 'lil-gui';
 import { useFrame, useThree } from '@react-three/fiber';
 import { PromptHint } from '../../components/PromptHint';
+import { CompletedSketch } from '../../utils/utils';
 
 function Circle({index, outerSize, shapeSize, geometry, material}: { index: number; outerSize: number; shapeSize: number; geometry: CircleGeometry; material: Material }) {
     const meshRef = useRef<Mesh>(null);
@@ -159,6 +160,7 @@ const Day1Project = () => {
 
     return (
         <>
+        <CompletedSketch day={1} />
         <PromptHint prompt={'one color one shape'} hint={'tap to change style'}/>
         <ambientLight ref={ambientRef} intensity={0.5} />
         <directionalLight ref={directionalRef} position={[5, 5, 5]} intensity={1} />

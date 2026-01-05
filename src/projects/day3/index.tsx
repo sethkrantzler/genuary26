@@ -3,6 +3,7 @@ import { Html, OrbitControls } from '@react-three/drei';
 import { PromptHint } from '../../components/PromptHint';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Color, Group, Mesh, MeshBasicMaterial } from 'three';
+import { CompletedSketch } from '../../utils/utils';
 
 const sharedMaterial = new MeshBasicMaterial({ wireframe: true, color: 'black' });
 
@@ -86,6 +87,8 @@ const Day3Project = () => {
 
   return (
     <>
+      <CompletedSketch day={3} />
+
       {Array.from({ length: 1000 }, (_, i) => (
         <FibonacciCircle
           key={i}
