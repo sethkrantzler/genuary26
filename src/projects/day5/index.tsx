@@ -119,8 +119,8 @@ const shapeModes = [
       const tick = () => {
         const t = performance.now() * 0.0003;
         meshes.forEach((m) => {
-          m.rotation.x += 0.02 + Math.sin(t + m.id) * 0.001;
-          m.rotation.y += 0.03 + Math.cos(t + m.id) * 0.001;
+          m.rotation.x += 0.002 + Math.sin(t + m.id) * 0.02;
+          m.rotation.y += 0.003 + Math.cos(t + m.id) * 0.02;
           m.rotation.z += 0.015;
         });
       };
@@ -242,7 +242,7 @@ const Day5Project = () => {
   
     gsap.to(pointLightRef.current.position, {
       x: 2.5,
-      duration: 3,
+      duration: 12,
       ease: "sine.inOut",
       yoyo: true,
       repeat: -1,
@@ -272,8 +272,8 @@ const Day5Project = () => {
     {/* Moving reflection light */}
     <pointLight
       ref={pointLightRef}
-      intensity={0.25}
-      distance={5}
+      intensity={0.1}
+      distance={8}
       color={"white"}
     />
 
