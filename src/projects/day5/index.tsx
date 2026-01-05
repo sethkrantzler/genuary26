@@ -147,31 +147,41 @@ const shapeModes = [
 
     onRotate: (ref) => {
       if (!ref.current) return;
-
+    
       const meshes = [];
       ref.current.traverse((c) => c instanceof THREE.Mesh && meshes.push(c));
-
+    
       const offsets = meshes.map(() => Math.random() * 1000);
-
+    
       const tick = () => {
         const t = performance.now() * 0.001;
-
+    
         meshes.forEach((m, i) => {
           const noise = Math.sin(t + offsets[i]);
-
+    
           if (noise > 0.92 && !m.userData.flipping) {
             m.userData.flipping = true;
-
+    
             gsap.to(m.rotation, {
               x: m.rotation.x + Math.PI,
               duration: 0.4,
               ease: "power2.inOut",
-              onComplete: () => (m.userData.flipping = false),
+              onComplete: () => {
+                // Snap relative to initial rotation (-90°)
+                const base = -Math.PI / 2;
+                const delta = m.rotation.x - base;
+                m.rotation.x = base + Math.round(delta / Math.PI) * Math.PI;
+    
+                // Cooldown
+                gsap.delayedCall(0.3, () => {
+                  m.userData.flipping = false;
+                });
+              },
             });
           }
         });
       };
-
+    
       gsap.ticker.add(tick);
       return () => gsap.ticker.remove(tick);
     },
