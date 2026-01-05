@@ -251,15 +251,21 @@ export function MicroFontLetter({
 }) {
   const ref = useRef<THREE.Group>(null);
 
-  // Call parent hook once ref exists
   useEffect(() => {
-    if (onRotate && ref.current) {
-      onRotate(ref);
-    }
+    if (!ref.current || !onRotate) return;
+  
+    // Start the animation for this mode
+    const cleanup = onRotate(ref);
+  
+    // Cleanup old animation when onRotate changes
+    return () => {
+      //@ts-ignore
+      if (cleanup) cleanup();
+    };
   }, [onRotate]);
 
   return (
-    <group ref={ref} position={position} rotation={rotation}>
+    <group ref={ref} position={position}>
       {data.map((row, rowIndex) =>
         row.map((cell, colIndex) => {
           if (!cell) return null;
@@ -268,6 +274,7 @@ export function MicroFontLetter({
             <mesh
               key={`${rowIndex}-${colIndex}`}
               geometry={geometry}
+              rotation={rotation}
               material={material}
               position={[
                 colIndex * spacing,
