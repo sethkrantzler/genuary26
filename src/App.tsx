@@ -78,7 +78,7 @@ function BackButton() {
 
   return (
     <button
-      onClick={(event) => {
+      onPointerDown={(event) => {
         event.stopPropagation();
         navigate('/');
       }}

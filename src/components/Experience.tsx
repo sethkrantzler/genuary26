@@ -58,7 +58,7 @@ function Title() {
             ref={textRef}
             geometry={geometry}
             material={sharedMatcapMaterial}
-            onClick={() => window.open('https://genuary.art', '_blank')}
+            onPointerDown={() => window.open('https://genuary.art', '_blank')}
         />
     );
 }
@@ -79,12 +79,13 @@ const Experience = () => {
         }
     }, []);
 
-    // Reset camera on mount
     useEffect(() => {
-      camera.position.set(0, 0, 5);
-      camera.rotation.set(0, 0, 0);
-      camera.lookAt(0, 0, 0);
-    }, [camera]);
+      if (location.pathname === "/") {
+        camera.position.set(0, 0, 5);
+        camera.rotation.set(0, 0, 0);
+        camera.lookAt(0, 0, 0);
+      }
+    }, [location.pathname, camera]);
   
     const handleClick = (day: number) => {
       navigate(`/${day}`);
@@ -103,7 +104,7 @@ const Experience = () => {
           <ProjectLink
             key={i}
             day={i + 1}
-            onClick={() => handleClick(i + 1)}
+            onPointerDown={() => handleClick(i + 1)}
           />
         ))}
       </>

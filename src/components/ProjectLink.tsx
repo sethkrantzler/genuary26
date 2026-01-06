@@ -79,7 +79,7 @@ function getVisitedSketches(): number[] {
   }
 }
 
-export function ProjectLink({ day, onClick }: { day: number; onClick: () => void }) {
+export function ProjectLink({ day, onPointerDown }: { day: number; onPointerDown: () => void }) {
   const textRef = useRef<THREE.Group>(null);
   const lastTriggerRef = useRef<number | null>(null);
   const isAnimating = useRef(false);
@@ -312,7 +312,7 @@ export function ProjectLink({ day, onClick }: { day: number; onClick: () => void
       <mesh
         ref={boxRef}
         geometry={boxGeometry!}
-        onClick={onClick}
+        onPointerDown={onPointerDown}
         material={new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 })}
       />
     </group>

@@ -5,6 +5,7 @@ import { PromptHint } from "../../components/PromptHint";
 import { CompletedSketch, createPathAstroid, createPathLemniscate, createPathRoundedRect, createPathDoubleSpring } from "../../utils/utils";
 import { OrbitControls } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
+import { Bloom, EffectComposer } from "@react-three/postprocessing";
 
 function BallGroup({ path, isLit, colors }) {
     const ballRefs = colors.map(() => useRef());
@@ -93,7 +94,7 @@ function BallGroup({ path, isLit, colors }) {
   }
   
   const Day6Project = () => {
-    const { camera } = useThree();
+    const { camera, gl } = useThree();
     const [isLit, setIsLit] = useState(false);
     const [pathIndex, setPathIndex] = useState(0);
   
@@ -111,24 +112,26 @@ function BallGroup({ path, isLit, colors }) {
     const cameraDistance = 4;
   
     useEffect(() => {
-      camera.position.set(1 * cameraDistance, 1 * cameraDistance, 1 * cameraDistance);
-      camera.lookAt(0, 0, 0);
-  
-      const toggle = () => {
-        setIsLit((prev) => {
-          const next = !prev;
-          if (!next) {
-            setPathIndex((i) => (i + 1) % paths.length);
-          }
-          return next;
-        });
-      };
+        const canvas = gl.domElement;
+        camera.position.set(1 * cameraDistance, 1 * cameraDistance, 1 * cameraDistance);
+        camera.lookAt(0, 0, 0);
+    
+        const toggle = () => {
+            setIsLit((prev) => {
+            const next = !prev;
+            if (!next) {
+                console.log("Switching path");
+                setPathIndex((i) => (i + 1) % paths.length);
+            }
+            return next;
+            });
+        };
 
-      window.addEventListener("click", toggle);
-  
-      return () => {
-        window.removeEventListener("click", toggle);
-      };
+        canvas.addEventListener("pointerdown", toggle);
+    
+        return () => {
+            canvas.removeEventListener("pointerdown", toggle);
+        };
     }, []);
   
     return (
@@ -159,6 +162,16 @@ function BallGroup({ path, isLit, colors }) {
           isLit={isLit}
           colors={["yellow", "cyan", "magenta", "lime"]}
         />
+        <EffectComposer>
+            <Bloom
+                intensity={1.5}
+                radius={0.5}
+                luminanceThreshold={0.2}
+                luminanceSmoothing={0.9}
+                mipmapBlur
+            />
+        </EffectComposer>
+
       </>
     );
   };

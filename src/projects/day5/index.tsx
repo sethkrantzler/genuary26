@@ -287,7 +287,7 @@ const Day5Project = () => {
       color={"white"}
     />
 
-      <group ref={wordRef} onClick={cycleMode}>
+      <group ref={wordRef} onPointerDown={cycleMode}>
         {displayString.split("").map((char, index) => {
           const upper = char.toUpperCase();
           const data = MicroFontLetterMap[upper];

@@ -239,7 +239,7 @@ const Day4Project = () => {
       <ambientLight intensity={1.5} />
     
       {/* Click catcher */}
-      <mesh position={[0, 0, -5]} onClick={handleClick}>
+      <mesh position={[0, 0, -5]} onPointerDown={handleClick}>
         <planeGeometry args={[100, 100]} />
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
