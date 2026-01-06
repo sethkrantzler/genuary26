@@ -315,3 +315,199 @@ export function CompletedSketch({ day }: { day: number }) {
 
   return null;
 }
+
+// --------------------------------------------------
+// ROUNDED RECTANGLE PATH (CurvePath)
+// --------------------------------------------------
+export function createPathRoundedRect(w = 2, h = 1, r = 0.3) {
+  const shape = new THREE.Shape();
+  shape.moveTo(-w / 2 + r, -h / 2);
+  shape.lineTo(w / 2 - r, -h / 2);
+  shape.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
+  shape.lineTo(w / 2, h / 2 - r);
+  shape.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2);
+  shape.lineTo(-w / 2 + r, h / 2);
+  shape.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
+  shape.lineTo(-w / 2, -h / 2 + r);
+  shape.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
+
+  const pts = shape.getPoints(200);
+  const path = new THREE.CurvePath<THREE.Vector3>();
+
+  for (let i = 0; i < pts.length - 1; i++) {
+    path.add(
+      new THREE.LineCurve3(
+        new THREE.Vector3(pts[i].x, pts[i].y, 0),
+        new THREE.Vector3(pts[i + 1].x, pts[i + 1].y, 0)
+      )
+    );
+  }
+
+  return path;
+}
+
+// --------------------------------------------------
+// ASTROID CURVE (x = a cos³θ, y = a sin³θ)
+// --------------------------------------------------
+export function createPathAstroid(size = 1) {
+  class AstroidCurve extends THREE.Curve<THREE.Vector3> {
+    size: number;
+    constructor() {
+      super();
+      this.size = size;
+    }
+    getPoint(t: number) {
+      const a = this.size;
+      const θ = t * Math.PI * 2;
+      const x = a * Math.pow(Math.cos(θ), 3);
+      const y = a * Math.pow(Math.sin(θ), 3);
+      return new THREE.Vector3(x, y, 0);
+    }
+  }
+  return new AstroidCurve();
+}
+
+// --------------------------------------------------
+// LEMNISCATE OF BERNOULLI
+// --------------------------------------------------
+export function createPathLemniscate(a = 1) {
+  class LemniscateCurve extends THREE.Curve<THREE.Vector3> {
+    a: number;
+    constructor() {
+      super();
+      this.a = a;
+    }
+    getPoint(t: number) {
+      const θ = t * Math.PI * 2;
+      const denom = 1 + Math.sin(θ) ** 2;
+      const x = (this.a * Math.cos(θ)) / denom;
+      const y = (this.a * Math.sin(θ) * Math.cos(θ)) / denom;
+      return new THREE.Vector3(x, y, 0);
+    }
+  }
+  return new LemniscateCurve();
+}
+
+export function createPathDoubleSpring({
+  radius = 0.25,
+  turns = 4.5,
+  height = 1.5,
+  bendLength = 0.5,
+  samples = 256, // number of samples to compute centroid
+}: {
+  radius?: number;
+  turns?: number;
+  height?: number;
+  bendLength?: number;
+  samples?: number;
+} = {}) {
+  class DoubleSpringCurve extends THREE.Curve<THREE.Vector3> {
+    radius: number;
+    turns: number;
+    height: number;
+    bendLength: number;
+    center: THREE.Vector3;
+
+    constructor() {
+      super();
+      this.radius = radius;
+      this.turns = turns;
+      this.height = height;
+      this.bendLength = bendLength;
+      this.center = new THREE.Vector3();
+
+      // compute centroid by sampling the raw curve
+      const acc = new THREE.Vector3();
+      for (let i = 0; i < samples; i++) {
+        const t = i / samples;
+        const p = this.sampleRaw(t);
+        acc.add(p);
+      }
+      acc.multiplyScalar(1 / samples);
+      this.center.copy(acc);
+    }
+
+    // compute the raw point (no centering)
+    sampleRaw(t: number) {
+      const TWO_PI = Math.PI * 2;
+
+      // Segment boundaries
+      const A = 0.33;
+      const B = 0.66;
+
+      // Segment A: vertical spring up
+      if (t < A) {
+        const u = t / A;
+        const angle = u * this.turns * TWO_PI;
+        const y = u * this.height;
+        return new THREE.Vector3(
+          Math.cos(angle) * this.radius,
+          y,
+          Math.sin(angle) * this.radius
+        );
+      }
+
+      // Common points for segments B/C
+      const angleA = this.turns * TWO_PI;
+      const start = new THREE.Vector3(
+        Math.cos(angleA) * this.radius,
+        this.height,
+        Math.sin(angleA) * this.radius
+      ); // end of first spring
+
+      const end = new THREE.Vector3(
+        this.bendLength + this.radius,
+        this.height,
+        0
+      ); // start position of second spring (u = 0)
+
+      // Segment B: half-circle arc
+      if (t < B) {
+        const u = (t - A) / (B - A);
+
+        const d = new THREE.Vector3().subVectors(end, start);
+        const dist = d.length();
+        d.normalize();
+
+        const R = dist / 2;
+        const center = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
+
+        const up = new THREE.Vector3(0, 1, 0);
+        let perp = new THREE.Vector3().crossVectors(d, up);
+        if (perp.lengthSq() < 1e-4) {
+          perp = new THREE.Vector3().crossVectors(d, new THREE.Vector3(1, 0, 0));
+        }
+        perp.normalize();
+
+        const angle = Math.PI * (1 - u);
+        const along = d.clone().multiplyScalar(R);
+
+        const pos = new THREE.Vector3()
+          .copy(center)
+          .addScaledVector(along, Math.cos(angle))
+          .addScaledVector(perp, Math.sin(angle) * R);
+
+        return pos;
+      }
+
+      // Segment C: descending spring
+      const u = (t - B) / (1 - B);
+      const angle = u * this.turns * TWO_PI;
+      const y = this.height - u * this.height;
+
+      return new THREE.Vector3(
+        this.bendLength + Math.cos(angle) * this.radius,
+        y,
+        Math.sin(angle) * this.radius
+      );
+    }
+
+    // getPoint returns the centered point
+    getPoint(t: number) {
+      const p = this.sampleRaw(t);
+      return p.sub(this.center);
+    }
+  }
+
+  return new DoubleSpringCurve();
+}
