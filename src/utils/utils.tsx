@@ -1,5 +1,5 @@
-import { useThree } from '@react-three/fiber';
-import { Ref, useEffect, useMemo, useRef } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
+import { Ref, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 
 /**
@@ -315,6 +315,94 @@ export function CompletedSketch({ day }: { day: number }) {
 
   return null;
 }
+
+// Simple passthrough vertex shader in clip space
+const DEFAULT_VERTEX_SHADER = /* glsl */ `
+  varying vec2 vUv;
+
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+type FullScreenShaderProps = {
+  fragmentPath: string;
+  uniforms?: Record<string, THREE.IUniform>;
+  transparent?: boolean;
+  onClick?: (event: THREE.Event) => void;
+};
+
+export const FullScreenShader: React.FC<FullScreenShaderProps> = ({
+  fragmentPath,
+  uniforms = {},
+  transparent = false,
+  onClick
+}) => {
+  const { viewport } = useThree();
+  const materialRef = useRef<THREE.ShaderMaterial | null>(null);
+  const [fragmentShader, setFragmentShader] = useState<string | null>(null);
+
+  // Load fragment shader source from a file path
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      const res = await fetch(fragmentPath);
+      const text = await res.text();
+      if (!cancelled) setFragmentShader(text);
+    };
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fragmentPath]);
+
+  // Base uniforms: time + resolution, plus user-provided
+  const mergedUniforms = useMemo(() => {
+    return {
+      uTime: { value: 0 },
+      uResolution: {
+        value: new THREE.Vector2(viewport.width, viewport.height),
+      },
+      ...uniforms,
+    };
+  }, [viewport.width, viewport.height, uniforms]);
+
+  // Animate uTime and keep uResolution in sync with viewport
+  useFrame(({ clock }) => {
+    if (!materialRef.current) return;
+    const u = materialRef.current.uniforms;
+
+    if (u.uTime) {
+      u.uTime.value = clock.getElapsedTime();
+    }
+    if (u.uResolution) {
+      (u.uResolution.value as THREE.Vector2).set(
+        viewport.width,
+        viewport.height
+      );
+    }
+  });
+
+  if (!fragmentShader) return null;
+
+  return (
+    <mesh position={[0, 0, 0]} onPointerDown={onClick}>
+      {/* Plane sized exactly to the current viewport */}
+      <planeGeometry args={[viewport.width, viewport.height, 1, 1]} />
+      <shaderMaterial
+        ref={materialRef}
+        vertexShader={DEFAULT_VERTEX_SHADER}
+        fragmentShader={fragmentShader}
+        uniforms={mergedUniforms}
+        transparent={transparent}
+      />
+    </mesh>
+  );
+};
 
 // --------------------------------------------------
 // ROUNDED RECTANGLE PATH (CurvePath)
