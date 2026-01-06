@@ -81,35 +81,25 @@ const Experience = () => {
   }, []);
 
   useEffect(() => {
-    if (location.pathname === "/") {
-      setCameraReady(false);
+    camera.position.set(0, 0, 5);
+    camera.rotation.set(0, 0, 0);
+    camera.lookAt(0, 0, 0);
+    camera.updateMatrixWorld();
+    camera.updateProjectionMatrix();
+    
+    // Manually update viewport in the state
+    const aspect = size.width / size.height;
+    if (camera instanceof THREE.PerspectiveCamera) {
+      const distance = camera.position.z;
+      const fov = (camera.fov * Math.PI) / 180;
+      const h = 2 * Math.tan(fov / 2) * distance;
+      const w = h * aspect;
       
-      // Reset camera
-      camera.position.set(0, 0, 5);
-      camera.rotation.set(0, 0, 0);
-      camera.lookAt(0, 0, 0);
-      camera.updateMatrixWorld();
-      camera.updateProjectionMatrix();
-      
-      // Force R3F to update its internal state
-      // This recalculates the viewport based on the new camera position
-      state.gl.render(state.scene, camera);
-      
-      // Manually update viewport in the state
-      const aspect = size.width / size.height;
-      if (camera instanceof THREE.PerspectiveCamera) {
-        const distance = camera.position.z;
-        const fov = (camera.fov * Math.PI) / 180;
-        const h = 2 * Math.tan(fov / 2) * distance;
-        const w = h * aspect;
-        
-        state.viewport.width = w;
-        state.viewport.height = h;
-      }
-
-      setCameraReady(true);
+      state.viewport.width = w;
+      state.viewport.height = h;
     }
-  }, [location.pathname, camera, size, state]);
+    setCameraReady(true);
+}, [camera, size, state]);
 
   const handleClick = (day: number) => {
     navigate(`/${day}`);
