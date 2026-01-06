@@ -215,35 +215,44 @@ const Day5Project = () => {
     };
   }, []);
 
-  // --------------------------------------------------
-  // CENTER + CAMERA FIT
-  // --------------------------------------------------
   useEffect(() => {
     if (!wordRef.current) return;
-
+  
+    // 1. Reset transforms
+    wordRef.current.position.set(0, 0, 0);
     wordRef.current.scale.set(1, 1, 1);
-
+  
+    // 2. Compute unscaled bounding box
     let box = new THREE.Box3().setFromObject(wordRef.current);
-    const center = new THREE.Vector3();
-    box.getCenter(center);
-    wordRef.current.position.sub(center);
-
-    box = new THREE.Box3().setFromObject(wordRef.current);
     const size = new THREE.Vector3();
     box.getSize(size);
-
+  
     const wordWidth = size.x;
-
-    const vFOV = (camera as THREE.PerspectiveCamera).fov * (Math.PI / 180);
-    const aspect = (camera as THREE.PerspectiveCamera).aspect;
-    const hFOV = 2 * Math.atan(Math.tan(vFOV / 2) * aspect);
-
+  
+    // 3. Compute visible width at fixed camera distance
+    const cam = camera as THREE.PerspectiveCamera;
+    const fixedDistance = cam.position.z;
+  
+    const vFOV = (cam.fov * Math.PI) / 180;
+    const visibleHeight = 2 * Math.tan(vFOV / 2) * fixedDistance;
+    const visibleWidth = visibleHeight * cam.aspect;
+  
+    // 4. Compute scale factor
     const padding = 1.2;
-    const requiredDistance = (wordWidth * padding) / (2 * Math.tan(hFOV / 2));
-
-    camera.position.set(0, 0, requiredDistance);
-    camera.updateProjectionMatrix();
-  }, [displayString, camera, modeIndex]);
+    const scale = (visibleWidth / wordWidth) / padding;
+  
+    // 5. Apply scale
+    wordRef.current.scale.set(scale, scale, scale);
+  
+    // 6. Recompute bounding box AFTER scaling
+    box = new THREE.Box3().setFromObject(wordRef.current);
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+  
+    // 7. Center the word in the viewport
+    wordRef.current.position.sub(center);
+  
+  }, [displayString, modeIndex]);
 
   useEffect(() => {
     if (!pointLightRef.current) return;

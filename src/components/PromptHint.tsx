@@ -10,7 +10,7 @@ export function PromptHint({prompt, hint, color}: {prompt: string; hint?: string
     }, []);
     
     return (
-        <Html center>
+        <Html center style={{ pointerEvents: "none" }}>
             <h1
                 style={{ 
                     textAlign: 'center',

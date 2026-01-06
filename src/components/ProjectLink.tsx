@@ -97,25 +97,24 @@ export function ProjectLink({ day, onPointerDown }: { day: number; onPointerDown
 
   const [geometry, setGeometry] = useState<TextGeometry | undefined>(undefined);
   const [boxGeometry, setBoxGeometry] = useState<THREE.BoxGeometry | undefined>(undefined);
+  const [localPosition, setLocalPosition] = useState<[number, number, number]>([0, 0, 0]);
 
   const { viewport } = useThree();
 
-  // ---------------------------
-  // GRID POSITIONING
-  // ---------------------------
-  const rows = 6;
-  const cols = Math.ceil(31 / rows);
-
-  const paddingX = viewport.width * 0.1;
-  const paddingY = viewport.height * 0.1;
-  const marginLeft = 0.05 * viewport.width;
-  const marginTop = -0.6;
-
-  const row = Math.floor((day - 1) / cols);
-  const col = (day - 1) % cols;
-  const x = marginLeft + (col - cols / 2) * ((viewport.width - paddingX * 2) / cols);
-  const y = marginTop + (rows / 2 - row) * ((viewport.height - paddingY * 2) / rows);
-
+  useEffect(() => {
+    const rows = 6;
+    const cols = Math.ceil(31 / rows);
+    const paddingX = viewport.width * 0.1;
+    const paddingY = viewport.height * 0.1;
+    const marginLeft = 0.05 * viewport.width;
+    const marginTop = -0.6;
+    const row = Math.floor((day - 1) / cols);
+    const col = (day - 1) % cols;
+    const x = marginLeft + (col - cols / 2) * ((viewport.width - paddingX * 2) / cols);
+    const y = marginTop + (rows / 2 - row) * ((viewport.height - paddingY * 2) / rows);
+    
+    setLocalPosition([x, y, 0]);
+  }, [viewport.width, viewport.height, day]);
   // ---------------------------
   // LOAD TEXT GEOMETRY
   // ---------------------------
@@ -288,7 +287,7 @@ export function ProjectLink({ day, onPointerDown }: { day: number; onPointerDown
   if (!ready) return null;
 
   return (
-    <group ref={textRef} position={[x, y, 0]}>
+    <group ref={textRef} position={localPosition}>
       {/* BACKGROUND SHAPE */}
       <mesh
         ref={shapeRef}

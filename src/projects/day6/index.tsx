@@ -31,6 +31,7 @@ function BallGroup({ path, isLit, colors }) {
             const t = (baseT + offset) % 1;
             const pos = path.getPointAt(t);
   
+            if (!ballRefs[i].current) return;
             ballRefs[i].current.position.copy(pos);
   
             lightRefs[i].top.current.position.set(pos.x, pos.y + 0.1, pos.z);
@@ -112,26 +113,26 @@ function BallGroup({ path, isLit, colors }) {
     const cameraDistance = 4;
   
     useEffect(() => {
-        const canvas = gl.domElement;
+      const canvas = gl.domElement;
         camera.position.set(1 * cameraDistance, 1 * cameraDistance, 1 * cameraDistance);
         camera.lookAt(0, 0, 0);
-    
-        const toggle = () => {
-            setIsLit((prev) => {
-            const next = !prev;
-            if (!next) {
-                console.log("Switching path");
-                setPathIndex((i) => (i + 1) % paths.length);
-            }
-            return next;
-            });
-        };
-
-        canvas.addEventListener("pointerdown", toggle);
-    
-        return () => {
-            canvas.removeEventListener("pointerdown", toggle);
-        };
+  
+      const toggle = () => {
+        setIsLit((prev) => {
+          const next = !prev;
+          if (!next) {
+            console.log("Switching path");
+            setPathIndex((i) => (i + 1) % paths.length);
+          }
+          return next;
+        });
+      };
+  
+      canvas.addEventListener("pointerdown", toggle);
+  
+      return () => {
+        canvas.removeEventListener("pointerdown", toggle);
+      };
     }, []);
   
     return (
@@ -139,29 +140,29 @@ function BallGroup({ path, isLit, colors }) {
         <PromptHint prompt="Lights On/off" hint="tap to switch the lights" color="white" />
         <CompletedSketch day={6} />
   
-        {/* FLOOR */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]} receiveShadow>
-          <planeGeometry args={[30, 30]} />
-          <meshStandardMaterial color="#222" />
-        </mesh>
-  
-        {/* BACK WALL */}
-        <mesh position={[0, 1, -2]} receiveShadow>
-          <planeGeometry args={[100, 100]} />
-          <meshStandardMaterial color="#111" />
-        </mesh>
-  
-        {/* LEFT WALL */}
-        <mesh rotation={[0, Math.PI / 2, 0]} position={[-2, 1, 0]} receiveShadow>
-          <planeGeometry args={[100, 100]} />
-          <meshStandardMaterial color="#111" />
-        </mesh>
-  
-        <BallTrack
-          path={path}
-          isLit={isLit}
-          colors={["yellow", "cyan", "magenta", "lime"]}
-        />
+            {/* FLOOR */}
+            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]} receiveShadow>
+            <planeGeometry args={[30, 30]} />
+            <meshStandardMaterial color="#222" />
+            </mesh>
+    
+            {/* BACK WALL */}
+            <mesh position={[0, 1, -2]} receiveShadow>
+            <planeGeometry args={[100, 100]} />
+            <meshStandardMaterial color="#111" />
+            </mesh>
+    
+            {/* LEFT WALL */}
+            <mesh rotation={[0, Math.PI / 2, 0]} position={[-2, 1, 0]} receiveShadow>
+            <planeGeometry args={[100, 100]} />
+            <meshStandardMaterial color="#111" />
+            </mesh>
+    
+            <BallTrack
+            path={path}
+            isLit={isLit}
+            colors={["yellow", "cyan", "magenta", "lime"]}
+            />
         <EffectComposer>
             <Bloom
                 intensity={1.5}

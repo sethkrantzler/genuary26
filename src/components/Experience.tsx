@@ -5,6 +5,7 @@ import { ProjectLink, sharedMatcapMaterial } from "./ProjectLink";
 import { useNavigate } from "react-router-dom";
 import { TextGeometry, FontLoader } from "three/examples/jsm/Addons.js";
 import { smoothstepRange } from "../utils/utils";
+import { OrbitControls } from "@react-three/drei";
 
 function Title() {
     const textRef = useRef<THREE.Mesh>(null);
@@ -64,51 +65,70 @@ function Title() {
 }
 
 const Experience = () => {
-    const { camera } = useThree();
-    const navigate = useNavigate();
+  const state = useThree();
+  const { camera, size, viewport } = state;
+  const navigate = useNavigate();
+  const [cameraReady, setCameraReady] = useState(false);
 
-    // ⭐ Create visitedSketches cookie if missing
-    useEffect(() => {
-        const existing = document.cookie
-            .split("; ")
-            .find((row) => row.startsWith("visitedSketches="));
+  useEffect(() => {
+      const existing = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("visitedSketches="));
 
-        if (!existing) {
-            // initialize with an empty array
-            document.cookie = `visitedSketches=${JSON.stringify([])}; path=/; max-age=31536000`;
-        }
-    }, []);
-
-    useEffect(() => {
-      if (location.pathname === "/") {
-        camera.position.set(0, 0, 5);
-        camera.rotation.set(0, 0, 0);
-        camera.lookAt(0, 0, 0);
+      if (!existing) {
+          document.cookie = `visitedSketches=${JSON.stringify([])}; path=/; max-age=31536000`;
       }
-    }, [location.pathname, camera]);
-  
-    const handleClick = (day: number) => {
-      navigate(`/${day}`);
-    };
-  
-    return (
-      <>
-        <directionalLight
-          position={[5, 1, 8]}
-          intensity={1.5}
-          castShadow
+  }, []);
+
+  useEffect(() => {
+    if (location.pathname === "/") {
+      setCameraReady(false);
+      
+      // Reset camera
+      camera.position.set(0, 0, 5);
+      camera.rotation.set(0, 0, 0);
+      camera.lookAt(0, 0, 0);
+      camera.updateMatrixWorld();
+      camera.updateProjectionMatrix();
+      
+      // Force R3F to update its internal state
+      // This recalculates the viewport based on the new camera position
+      state.gl.render(state.scene, camera);
+      
+      // Manually update viewport in the state
+      const aspect = size.width / size.height;
+      if (camera instanceof THREE.PerspectiveCamera) {
+        const distance = camera.position.z;
+        const fov = (camera.fov * Math.PI) / 180;
+        const h = 2 * Math.tan(fov / 2) * distance;
+        const w = h * aspect;
+        
+        state.viewport.width = w;
+        state.viewport.height = h;
+      }
+
+      setCameraReady(true);
+    }
+  }, [location.pathname, camera, size, state]);
+
+  const handleClick = (day: number) => {
+    navigate(`/${day}`);
+  };
+
+  return (
+    <>
+      <directionalLight position={[5, 1, 8]} intensity={1.5} castShadow />
+      <ambientLight intensity={0.3} />
+      <Title />
+      {cameraReady && Array.from({ length: 31 }, (_, i) => (
+        <ProjectLink
+          key={i}
+          day={i + 1}
+          onPointerDown={() => handleClick(i + 1)}
         />
-        <ambientLight intensity={0.3} />
-        <Title />
-        {Array.from({ length: 31 }, (_, i) => (
-          <ProjectLink
-            key={i}
-            day={i + 1}
-            onPointerDown={() => handleClick(i + 1)}
-          />
-        ))}
-      </>
-    );
+      ))}
+    </>
+  );
 };
 
 export default Experience;
