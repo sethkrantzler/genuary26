@@ -215,7 +215,7 @@ export function ProjectLink({ day, onPointerDown }: { day: number; onPointerDown
         ref={shapeRef}
         geometry={shapeGeometry}
         material={shapeMaterial}
-        position={[0, 0, -0.01]}
+        position={[0, 0, -0.005*viewport.width]}
         rotation={
           shapeType === "diamond"
             ? [0, 0, Math.PI / 2]
