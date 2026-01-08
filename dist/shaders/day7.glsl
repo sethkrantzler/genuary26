@@ -5,11 +5,11 @@ uniform vec2 uResolution;
 uniform int primaryPetals;
 uniform int secondaryPetals;
 uniform bool divideSecondaryPetals;
+uniform vec3 paletteColor;
 varying vec2 vUv;
 
 vec3 palette(in float t) {
-    vec3 d = vec3(0.0, 0., 0.);
-    return vec3(0.5) + vec3(1.0) * cos(6.283185 * (vec3(-1.5) * t + d));
+    return vec3(0.5) + vec3(1.0) * cos(6.283185 * (vec3(-1.5) * t + paletteColor));
 }
 
 float stroke(float x, float size, float w) {
@@ -43,7 +43,7 @@ void main() {
     if (divideSecondaryPetals) {
         l = 0.05 / l;
     }
-    
+
     vec3 layer1 = palette(q);
     vec3 layer2 = palette(p);
     vec3 layer3 = palette(l);

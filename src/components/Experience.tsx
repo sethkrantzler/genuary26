@@ -53,13 +53,23 @@ function Title() {
         scene.background = new THREE.Color(s, s, s);      
     });
     
+    const handleClick = () => {
+        const a = document.createElement('a');
+        a.href = 'https://genuary.art';
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+    
     return (
         <mesh
             position={[0, (viewport.height/2) - 0.5, 0]}
             ref={textRef}
             geometry={geometry}
             material={sharedMatcapMaterial}
-            onPointerDown={() => window.open('https://genuary.art', '_blank')}
+            onPointerDown={handleClick}
         />
     );
 }
