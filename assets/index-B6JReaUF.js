@@ -1,1 +1,0 @@
-import{j as e,H as r}from"./main-B-vYkSTl.js";const i=()=>e.jsx(r,{position:[0,0,0],center:!0,children:e.jsxs("div",{style:{color:"black",background:"white",padding:"10px",borderRadius:"5px"},children:[e.jsx("h1",{children:"Project for Day 12"}),e.jsx("p",{children:"This is an HTML overlay rendered inside the 3D scene."})]})});export{i as default};
