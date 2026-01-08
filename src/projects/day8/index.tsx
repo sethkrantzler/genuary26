@@ -2,7 +2,7 @@ import React, { useRef, useMemo, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
-import { Html } from '@react-three/drei';
+import { Html, OrbitControls } from '@react-three/drei';
 import { PromptHint } from '../../components/PromptHint';
 import { CompletedSketch, createPathAstroid } from '../../utils/utils';
 import gsap from 'gsap';
@@ -410,7 +410,7 @@ const Skyline = () => {
 };
 
 const Day8Project = () => {
-    const {camera} = useThree();
+    const {camera, scene} = useThree();
     const buildings = useMemo(() => {
         const result = [];
         let leftZ = -DEPTH;
@@ -430,38 +430,39 @@ const Day8Project = () => {
     }, []);
 
     useEffect(() => {
-        camera.position.set(0, 5, 8);
-        (camera as THREE.PerspectiveCamera).fov = 75;
+        scene.background = new THREE.Color('#000814');
+        scene.fog = new THREE.Fog('#000814', 20, DEPTH);
     }, []);
 
     return (
         <>
-          <PromptHint prompt={'Build a Metropolis'} color={'white'} />
+          <PromptHint prompt="Build a Metropolis" color="white" />
           <CompletedSketch day={8} />
-          <color attach="background" args={['#000814']} />
-          <fog attach="fog" args={['#000814', 20, DEPTH]} />
-          
-          <ambientLight intensity={0.3} />
-          <pointLight position={[0, 10, 0]} intensity={0.5} />
-          
-          <Moon />
-          <Stars />
-          <Skyline />
-          <Road />
-          
-          {buildings.map(({ side, position, key }) => (
+          <OrbitControls />
+      
+          <group position={[0, -5, -3]}>
+            <ambientLight intensity={0.3} />
+            <pointLight position={[0, 10, 0]} intensity={0.5} />
+      
+            <Moon />
+            <Stars />
+            <Skyline />
+            <Road />
+      
+            {buildings.map(({ side, position, key }) => (
               <Building key={key} side={side} position={position} />
-          ))}
-          
-          <EffectComposer>
-            <Bloom 
+            ))}
+      
+            <EffectComposer>
+              <Bloom
                 intensity={1.5}
                 luminanceThreshold={0.2}
                 luminanceSmoothing={0.9}
-            />
-          </EffectComposer>
+              />
+            </EffectComposer>
+          </group>
         </>
-    );
+      );
 };
 
 export default Day8Project;

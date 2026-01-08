@@ -107,6 +107,7 @@ const Experience = () => {
       
       state.viewport.width = w;
       state.viewport.height = h;
+      camera.fov = 45;
     }
     setCameraReady(true);
 }, [camera, size, state]);
