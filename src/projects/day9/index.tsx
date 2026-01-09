@@ -98,7 +98,7 @@ export function CellularAutomata({
   }, [currentRow, gridWidth, stepTime]);
 
   return (
-    <group ref={groupRef} position={[0, 6, 0]}>
+    <group ref={groupRef} position={[0, 4, 0]}>
       {rows.map((row, rowIndex) => (
         <Layer2D
           key={row.id}

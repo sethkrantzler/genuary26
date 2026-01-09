@@ -2,10 +2,10 @@ import * as THREE from "three";
 import React, { useState, useEffect, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { ProjectLink, sharedMatcapMaterial } from "./ProjectLink";
+import { MouseIcon } from "./MouseIcon";
 import { useNavigate } from "react-router-dom";
 import { TextGeometry, FontLoader } from "three/examples/jsm/Addons.js";
 import { smoothstepRange } from "../utils/utils";
-import { OrbitControls } from "@react-three/drei";
 
 function Title() {
     const textRef = useRef<THREE.Mesh>(null);
@@ -79,7 +79,10 @@ const Experience = () => {
   const { camera, size, viewport } = state;
   const navigate = useNavigate();
   const [cameraReady, setCameraReady] = useState(false);
-
+  const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(
+    navigator.userAgent
+  )
+  
   useEffect(() => {
       const existing = document.cookie
           .split("; ")
@@ -113,7 +116,9 @@ const Experience = () => {
 }, [camera, size, state]);
 
   const handleClick = (day: number) => {
-    navigate(`/${day}`);
+    setTimeout(() => {
+      navigate(`/${day}`);
+    }, 150);
   };
 
   return (
@@ -121,6 +126,7 @@ const Experience = () => {
       <directionalLight position={[5, 1, 8]} intensity={1.5} castShadow />
       <ambientLight intensity={0.3} />
       <Title />
+      {!isMobile && <MouseIcon />}
       {cameraReady && Array.from({ length: 31 }, (_, i) => (
         <ProjectLink
           key={i}
