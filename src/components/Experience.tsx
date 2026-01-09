@@ -118,7 +118,7 @@ const Experience = () => {
   const handleClick = (day: number) => {
     setTimeout(() => {
       navigate(`/${day}`);
-    }, 150);
+    }, isMobile ? 0: 250);
   };
 
   return (
