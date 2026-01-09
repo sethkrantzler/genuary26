@@ -98,7 +98,7 @@ export function CellularAutomata({
   }, [currentRow, gridWidth, stepTime]);
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} position={[0, 6, 0]}>
       {rows.map((row, rowIndex) => (
         <Layer2D
           key={row.id}
@@ -301,24 +301,38 @@ function DirectionalLightUp() {
 // -----------------------------------------------------
 const Day9Project = () => {
   const { camera, scene, gl } = useThree();
-  const [themeIndex, setThemeIndex] = useState(0);
+  const [themeIndex, setThemeIndex] = useState(1);
 
   const theme = THEMES[themeIndex];
 
   // Background + camera setup
   useEffect(() => {
     scene.background = new THREE.Color(theme.background);
-    camera.position.set(-15, -15, -15);
+    camera.position.set(-30, -30, -30);
   }, [theme, camera, scene]);
 
-  // Pointer listener to cycle themes
   useEffect(() => {
     const handlePointer = () => {
-      setThemeIndex((i) => (i + 1) % THEMES.length);
+        setThemeIndex(i => (i + 1) % THEMES.length);
+      };
+    
+    let lastTap = 0;
+  
+    const handleDoubleTap = () => {
+      const now = Date.now();
+      if (now - lastTap < 300) handlePointer();
+      lastTap = now;
     };
-
-    gl.domElement.addEventListener('dblclick', handlePointer);
-    return () => gl.domElement.removeEventListener('dblclick', handlePointer);
+  
+    const handleDblClick = () => handlePointer();
+  
+    gl.domElement.addEventListener("dblclick", handleDblClick);
+    gl.domElement.addEventListener("pointerdown", handleDoubleTap);
+  
+    return () => {
+      gl.domElement.removeEventListener("dblclick", handleDblClick);
+      gl.domElement.removeEventListener("pointerdown", handleDoubleTap);
+    };
   }, [gl]);
 
   return (
