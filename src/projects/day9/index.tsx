@@ -315,23 +315,11 @@ const Day9Project = () => {
     const handlePointer = () => {
         setThemeIndex(i => (i + 1) % THEMES.length);
       };
-    
-    let lastTap = 0;
   
-    const handleDoubleTap = () => {
-      const now = Date.now();
-      if (now - lastTap < 300) handlePointer();
-      lastTap = now;
-    };
-  
-    const handleDblClick = () => handlePointer();
-  
-    gl.domElement.addEventListener("dblclick", handleDblClick);
-    gl.domElement.addEventListener("pointerdown", handleDoubleTap);
+    gl.domElement.addEventListener("dblclick", handlePointer);
   
     return () => {
-      gl.domElement.removeEventListener("dblclick", handleDblClick);
-      gl.domElement.removeEventListener("pointerdown", handleDoubleTap);
+      gl.domElement.removeEventListener("dblclick", handlePointer);
     };
   }, [gl]);
 
