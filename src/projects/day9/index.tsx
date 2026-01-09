@@ -301,15 +301,15 @@ function DirectionalLightUp() {
 // -----------------------------------------------------
 const Day9Project = () => {
   const { camera, scene, gl } = useThree();
-  const [themeIndex, setThemeIndex] = useState(1);
+  const [themeIndex, setThemeIndex] = useState(0);
 
   const theme = THEMES[themeIndex];
 
   // Background + camera setup
   useEffect(() => {
     scene.background = new THREE.Color(theme.background);
-    camera.position.set(-30, -30, -30);
-  }, [theme, camera, scene]);
+    camera.position.set(-15, -15, -15);
+  }, [camera, scene]);
 
   useEffect(() => {
     const handlePointer = () => {
@@ -329,6 +329,7 @@ const Day9Project = () => {
         prompt={'Cellular Automata'}
         hint={'double tap to change rule + colors'}
         color={'lightgreen'}
+        timeout={5000}
       />
       <CompletedSketch day={9}/>
 
