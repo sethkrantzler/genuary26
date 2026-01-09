@@ -312,6 +312,10 @@ const Day9Project = () => {
   }, [camera, scene]);
 
   useEffect(() => {
+    scene.background = new THREE.Color(theme.background);
+  }, [scene, theme]);
+
+  useEffect(() => {
     const handlePointer = () => {
         setThemeIndex(i => (i + 1) % THEMES.length);
       };
