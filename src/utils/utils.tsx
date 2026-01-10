@@ -231,6 +231,51 @@ export const MicroFontLetterMap = {
     [1,1,1],
     [0,0,1],
   ],
+  "{": [
+    [0,1,1],
+    [1,1,0],
+    [0,1,1],
+  ],
+  "}": [
+    [1,1,0],
+    [0,1,1],
+    [1,1,0],
+  ],
+  ";": [
+    [0,0,0],
+    [0,1,0],
+    [0,1,0],
+  ],
+  "=": [  
+    [0,0,0],
+    [1,1,1],
+    [1,1,1],
+  ],
+  ">": [  
+    [1,0,0],
+    [0,1,0],
+    [1,0,0],
+  ],
+  "<": [  
+    [0,0,1],
+    [0,1,0],
+    [0,0,1],
+  ],
+  "\"": [
+    [1,0,1],
+    [0,0,0],
+    [0,0,0],
+  ],
+  "[": [
+    [1,1,1],
+    [1,0,0],
+    [1,1,1],
+  ],
+  "]": [
+    [1,1,1],
+    [0,0,1],
+    [1,1,1],
+  ],
 };
 
 export function MicroFontLetter({
@@ -288,6 +333,89 @@ export function MicroFontLetter({
       )}
     </group>
   );
+}
+
+type LetterCacheEntry = {
+  mesh: THREE.InstancedMesh;
+  count: number;
+};
+
+const LetterCache: Record<string, LetterCacheEntry> = {};
+
+export function CachedLetter({
+  char,
+  position,
+  rotation,
+  scale = [1, 1, 1],
+}: {
+  char: string;
+  position: [number, number, number];
+  rotation?: [number, number, number];
+  scale?: [number, number, number];
+}) {
+  const ref = useRef<THREE.Object3D>(null);
+
+  const mesh = getLetterInstance(char);
+  if (!mesh) return null;
+
+  return (
+    <primitive
+      object={mesh}
+      ref={ref}
+      position={position}
+      rotation={rotation}
+      scale={scale}
+    />
+  );
+}
+
+export function initLetterCache(
+  geometry: THREE.BufferGeometry,
+  material: THREE.Material,
+  pixelSpacing: number
+) {
+  Object.keys(MicroFontLetterMap).forEach((char) => {
+    if (LetterCache[char]) return; // already built
+
+    const data = MicroFontLetterMap[char];
+    if (!data) return;
+
+    // Count pixels
+    const pixels: Array<[number, number]> = [];
+    data.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        if (cell) pixels.push([colIndex, rowIndex]);
+      });
+    });
+
+    const count = pixels.length;
+    const instanced = new THREE.InstancedMesh(geometry, material, count);
+
+    pixels.forEach(([col, row], i) => {
+      const m = new THREE.Matrix4();
+      m.setPosition(
+        col * pixelSpacing,
+        -row * pixelSpacing,
+        0
+      );
+      instanced.setMatrixAt(i, m);
+    });
+
+    instanced.instanceMatrix.needsUpdate = true;
+
+    LetterCache[char] = {
+      mesh: instanced,
+      count,
+    };
+  });
+}
+
+export function getLetterInstance(char: string) {
+  const entry = LetterCache[char];
+  if (!entry) return null;
+
+  // Clone the instanced mesh (cheap)
+  return entry.mesh.clone();
 }
 
 export function CompletedSketch({ day }: { day: number }) {

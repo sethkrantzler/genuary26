@@ -153,12 +153,12 @@ export function MovingObject({
       const pos = groupRef.current.position
       const radius = Math.sqrt(pos.x * pos.x + pos.y * pos.y)
 
-      if (radius <= stepSize) {
+      if (radius <= 0.05) {
         gsap.to(groupRef.current.scale, {
           x: 0.1,
           y: 0.1,
           z: 0.1,
-          duration: 0.2,
+          duration: 0.8,
           ease: "power2.in",
           onComplete: () => {
             disposeSelf()
@@ -220,7 +220,7 @@ const Day10Project = () => {
 
   return (
     <>
-      <PromptHint prompt={'Polar Coordinates'} color={'black'}/>
+      <PromptHint prompt={'Polar Coordinates'} color={'black'} timeout={0.1}/>
       <CompletedSketch day={10} />
 
       <BackgroundBliss />
@@ -232,9 +232,9 @@ const Day10Project = () => {
             key={`${ringKeys[ringIndex]}-${ringIndex}-${i}`}
             index={i}
             ringCount={ringCount}
-            outerDistance={radius}
+            outerDistance={radius+5}
             stepSize={0.5}
-            stepTime={0.3}
+            stepTime={0.5}
             spawnRing={() => spawnRing(ringIndex)}
           />
         ))
