@@ -8,16 +8,15 @@ import {rawSource as S0} from './sourceCode.ts'
 
 const D=()=>{
   const src=S0.trim().split("\n")
-  const {scene,viewport:v,gl}=T()
+  const {scene:sc,viewport:v}=T()
   const lines=R([])
   const h=.05
   const geo=new THREE.BoxGeometry(.1,.1,.1)
   const mat=new THREE.MeshBasicMaterial({color:"lime"})
 
-  E(()=>gl.setClearColor('#011'),[])
+  E(()=>{sc.background = new THREE.Color('#001210')},[])
   E(()=>I(geo,mat,.1),[])
 
-  // Build lines once
   E(()=>{
     src.forEach((t,i)=>{
       const g=new THREE.Group()
@@ -25,21 +24,25 @@ const D=()=>{
       t.split("").forEach((c,j)=>{
         const u=c.toUpperCase()
         if(M[u]){
-          const inst=L(u)        // get cached instanced mesh
+          const inst=L(u)
           const clone=inst.clone()
           clone.position.set(j*.5,0,0)
           g.add(clone)
         }
       })
-      g.position.set(-v.width/2+.2,-v.height/2,0)
-      scene.add(g)
+      g.position.set(-v.width/2+.2,-v.height/2-1,0)
+      sc.add(g)
       lines.current[i]=g
     })
+
+    return()=>{ 
+      lines.current.forEach(g=>sc.remove(g))
+      lines.current=[]
+    }
   },[])
 
-  // Animate forever
   E(()=>{
-    const tl=gsap.timeline({repeat:-1, repeatDelay:2})
+    const tl=gsap.timeline({repeat:-1})
     lines.current.forEach((g,i)=>{
       tl.to(g.position,{
         y:v.height/3-(i+1)*h,
