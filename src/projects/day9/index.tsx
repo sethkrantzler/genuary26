@@ -307,7 +307,6 @@ const Day9Project = () => {
 
   // Background + camera setup
   useEffect(() => {
-    scene.background = new THREE.Color(theme.background);
     camera.position.set(-15, -15, -15);
   }, [camera, scene]);
 
@@ -331,7 +330,7 @@ const Day9Project = () => {
     <>
       <PromptHint
         prompt={'Cellular Automata'}
-        hint={'double tap to change rule + colors'}
+        hint={'double tap to change rules'}
         color={'lightgreen'}
         timeout={5000}
       />
