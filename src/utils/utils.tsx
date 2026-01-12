@@ -446,7 +446,7 @@ export function CompletedSketch({ day }: { day: number }) {
 }
 
 // Simple passthrough vertex shader in clip space
-const DEFAULT_VERTEX_SHADER = /* glsl */ `
+export const DEFAULT_VERTEX_SHADER: string = /* glsl */ `
   varying vec2 vUv;
 
   void main() {
