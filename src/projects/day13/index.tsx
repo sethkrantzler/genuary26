@@ -42,6 +42,7 @@ const PointCloudPortrait = forwardRef(function PointCloudPortrait(
 ) {
   const texture = useTexture(src);
   const groupRef = useRef<THREE.Group>(null);
+  const {camera} = useThree();
 
   const [points, setPoints] = useState<PointData[]>([]);
   const energyRef = useRef(10.3);
@@ -152,16 +153,16 @@ const PointCloudPortrait = forwardRef(function PointCloudPortrait(
 
     // decay energy
     const baseline = 1;
+    const t = performance.now() * 0.001;
     energyRef.current += (baseline - energyRef.current) * 0.03;
 
     const spheres = groupRef.current.children as THREE.Mesh[];
-    const t = performance.now() * 0.001;
 
     spheres.forEach((sphere, i) => {
       const p = points[i];
       const home = p.home;
 
-      const A = p.amp * energyRef.current;
+      const A = p.amp * energyRef.current*Math.sin(t)+0.25*Math.sin(2*Math.PI + 0.05*(15-camera.position.z));
       const angle = t * p.freq + p.phase;
 
       const offset = new Vector3(A, 0, 0).applyAxisAngle(p.axis, angle);
@@ -200,66 +201,88 @@ const PointCloudPortrait = forwardRef(function PointCloudPortrait(
   );
 });
 
-// --------------------------------------------------
-// MAIN PROJECT — DAY 13
-// --------------------------------------------------
 const Day13Project = () => {
-  const { scene, gl, camera } = useThree();
-  const portraitRef = useRef<any>(null);
-
-  useEffect(() => {
-    scene.background = new Color('black');
-    camera.position.set(0, 0, 15);
-    camera.near = 0.3;
-    gl.outputColorSpace = THREE.SRGBColorSpace;
-  }, [scene, gl]);
-
-  return (
-    <>
-      <CompletedSketch day={13} />
-
-      <ambientLight intensity={1.5} />
-
-      {/* Click catcher */}
-      <mesh
-        position={[0, 0, -5]}
-        onDoubleClick={(e) => {
+    const { scene, gl, camera } = useThree();
+    const portraitRef = useRef<any>(null);
+  
+    const cameraTweenRef = useRef<gsap.core.Tween | null>(null);
+    const lastTapRef = useRef(0);
+  
+    const startCameraTween = () => {
+      cameraTweenRef.current = gsap.to(camera.position, {
+        z: 0.01,
+        duration: 5,
+        yoyo: true,
+        repeat: -1,
+        ease: "power2.inOut",
+        yoyoEase: "power2.inOut"
+      });
+    };
+  
+    const stopCameraTween = () => {
+      if (cameraTweenRef.current) {
+        cameraTweenRef.current.kill();
+        cameraTweenRef.current = null;
+      }
+    };
+  
+    const handleDoubleTap = () => {
+      const now = performance.now();
+      if (now - lastTapRef.current < 300) {
+        if (cameraTweenRef.current) stopCameraTween();
+        else startCameraTween();
+      }
+      lastTapRef.current = now;
+    };
+  
+    useEffect(() => {
+      scene.background = new Color("black");
+      camera.position.set(0, 0, 15);
+      camera.near = 0.3;
+      gl.outputColorSpace = THREE.SRGBColorSpace;
+  
+      startCameraTween();
+  
+      return () => {
+        stopCameraTween();
+      };
+    }, [scene, gl, camera]);
+  
+    return (
+      <>
+        <CompletedSketch day={13} />
+  
+        <ambientLight intensity={1.5} />
+  
+        <mesh
+          position={[0, 0, -5]}
+          onPointerDown={(e) => {
             e.stopPropagation();
-            gsap.to(camera.position, { 
-                z: 0,
-                duration: 5,
-                yoyo: true,
-                repeat: 1,
-                yoyoEase: 'power2.inOut',
-                ease: 'power2.inOut'
-            });
-        }}
-        onPointerDown={(e) => {
-          e.stopPropagation();
-          portraitRef.current?.excite();
-        }}
-      >
-        <planeGeometry args={[100, 100]} />
-        <meshBasicMaterial transparent opacity={0} side={2} />
-      </mesh>
-
-      <OrbitControls />
-
-      <PointCloudPortrait
-        ref={portraitRef}
-        src={`${import.meta.env.BASE_URL}images/day13/image.jpg`}
-        resolution={5000}
-        size={6}
-        position={[0, 0, 0]}
-      />
-
-      <PromptHint
-        prompt={'Self Portrait'}
-        color={'purple'}
-        hint={'tap to excite me'}
-      />
-    </>
-  );
-};
+            portraitRef.current?.excite();
+            handleDoubleTap();
+          }}
+        >
+          <planeGeometry args={[100, 100]} />
+          <meshBasicMaterial transparent opacity={0} side={2} />
+        </mesh>
+  
+        <OrbitControls />
+  
+        <PointCloudPortrait
+          ref={portraitRef}
+          src={`${import.meta.env.BASE_URL}images/day13/image.jpg`}
+          resolution={5000}
+          size={6}
+          position={[0, 0, 0]}
+        />
+  
+        <PromptHint
+          prompt={"Self Portrait"}
+          color={"purple"}
+          hint={"tap to excite me, double tap to toggle camera motion"}
+        />
+      </>
+    );
+  };
 
 export default Day13Project;
