@@ -12,7 +12,7 @@ import { is } from '@react-three/fiber/dist/declarations/src/core/utils'
    ShapeBox (silvery metal)
 --------------------------------*/
 function ShapeBox() {
-  const { scene } = useGLTF('/models/day14/shapebox.glb') as GLTF
+  const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/day14/shapebox.glb`) as GLTF
 
   // Apply a metallic silver material to everything in the box
   scene.traverse((child) => {
@@ -146,11 +146,11 @@ function Plug({
 /* ------------------------------
    Main Scene
 --------------------------------*/
-function Scene({animate}: {animate?: boolean}) {
+function Scene({ animate }: { animate?: boolean }) {
   return (
     <>
       {/* Background */}
-      <color attach="background" args={['#d2b48c']} /> {/* tan */}
+      <color attach="background" args={['#d2b48c']} />
 
       {/* Lighting */}
       <ambientLight intensity={0.6} />
@@ -161,75 +161,79 @@ function Scene({animate}: {animate?: boolean}) {
       />
       <Environment preset="city" />
 
-      <group position={[0, 0, 0]} rotation={[Math.PI/2, Math.PI/2,0]}>
+      <group position={[0, 0, 0]} rotation={[Math.PI / 2, Math.PI / 2, 0]}>
         <ShapeBox />
 
         {/* Plugs */}
         <Plug
-            url="/models/day14/cube_plug.glb"
-            color="#ff4444"
-            position={[0, 0, 0]}
-            direction={[1, 0, 0]}
-            rotationAmount={new THREE.Vector3(Math.PI/2, 0, 0)}
-            animationDistance={3}
-            side={0}
-            animate={animate}
+          url={`${import.meta.env.BASE_URL}models/day14/cube_plug.glb`}
+          color="#ff4444"
+          position={[0, 0, 0]}
+          direction={[1, 0, 0]}
+          rotationAmount={new THREE.Vector3(Math.PI / 2, 0, 0)}
+          animationDistance={3}
+          side={0}
+          animate={animate}
         />
+
         <Plug
-            url="/models/day14/cylinder_plug.glb"
-            color="#44aaff"
-            position={[0, 0, 0]}
-            direction={[0, 0, -1]}
-            rotationAmount={new THREE.Vector3(0, 0, Math.PI)}
-            animationDistance={1.25}
-            side={1}
-            animate={animate}
+          url={`${import.meta.env.BASE_URL}models/day14/cylinder_plug.glb`}
+          color="#a640e6"
+          position={[0, 0, 0]}
+          direction={[0, 0, -1]}
+          rotationAmount={new THREE.Vector3(0, 0, Math.PI)}
+          animationDistance={1.25}
+          side={1}
+          animate={animate}
         />
+
         <Plug
-            url="/models/day14/heart_plug.glb"
-            color="#ff66cc"
-            position={[0, 0, 0]}
-            direction={[-1, 0, 0]}
-            rotationAmount={new THREE.Vector3(Math.PI*2, 0, 0)}
-            animationDistance={1.25}
-            side={2}
-            animate={animate}
+          url={`${import.meta.env.BASE_URL}models/day14/heart_plug.glb`}
+          color="#ff66cc"
+          position={[0, 0, 0]}
+          direction={[-1, 0, 0]}
+          rotationAmount={new THREE.Vector3(Math.PI * 2, 0, 0)}
+          animationDistance={1.25}
+          side={2}
+          animate={animate}
         />
+
         <Plug
-            url="/models/day14/plus_plug.glb"
-            color="#ffaa33"
-            position={[0, 0, 0]}
-            direction={[0, 0, 1]}
-            rotationAmount={new THREE.Vector3(0, 0, Math.PI/2)}
-            animationDistance={1.5}
-            side={3}
-            animate={animate}
+          url={`${import.meta.env.BASE_URL}models/day14/plus_plug.glb`}
+          color="#66ff66"
+          position={[0, 0, 0]}
+          direction={[0, 0, 1]}
+          rotationAmount={new THREE.Vector3(0, 0, Math.PI / 2)}
+          animationDistance={1.5}
+          side={3}
+          animate={animate}
         />
+
         <Plug
-            url="/models/day14/star_plug.glb"
-            color="#ffee33"
-            position={[0, 0, 0]}
-            direction={[0, 1, 0]}
-            rotationAmount={new THREE.Vector3(0, Math.PI / 2.5, 0)}
-            animationDistance={1.5}
-            side={4}
-            animate={animate}
+          url={`${import.meta.env.BASE_URL}models/day14/star_plug.glb`}
+          color="#ffee33"
+          position={[0, 0, 0]}
+          direction={[0, 1, 0]}
+          rotationAmount={new THREE.Vector3(0, Math.PI / 2.5, 0)}
+          animationDistance={1.5}
+          side={4}
+          animate={animate}
         />
+
         <Plug
-            url="/models/day14/triangle_plug.glb"
-            color="#66ff66"
-            position={[0, 0, 0]}
-            direction={[0, -1, 0]}
-            rotationAmount={new THREE.Vector3(0, Math.PI/1.5, 0)}
-            animationDistance={1.5}
-            side={5}
-            animate={animate}   
+          url={`${import.meta.env.BASE_URL}models/day14/triangle_plug.glb`}
+          color="#44aaff"
+          position={[0, 0, 0]}
+          direction={[0, -1, 0]}
+          rotationAmount={new THREE.Vector3(0, Math.PI / 1.5, 0)}
+          animationDistance={1.5}
+          side={5}
+          animate={animate}
         />
-        </group>
+      </group>
     </>
   )
 }
-
 const Day14Project = () => {
   const [controlsEnabled, setControlsEnabled] = useState(true)
   const [autoOrbit, setAutoOrbit] = useState(false)
