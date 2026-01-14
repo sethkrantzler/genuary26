@@ -6,6 +6,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { GLTF } from 'three-stdlib'
 import { gsap } from 'gsap'
+import { is } from '@react-three/fiber/dist/declarations/src/core/utils'
 
 /* ------------------------------
    ShapeBox (silvery metal)
@@ -34,11 +35,15 @@ function Plug({
   direction = [0, 0, 1],
   rotationAmount = new THREE.Vector3(0, Math.PI, 0),
   animationDistance = 2,
-  noiseFrequency = 0.5, // NEW: how often flips happen
+  side = 0,              // NEW: which side this plug belongs to
+  totalSides = 6,        // NEW: total plugs in the loop
+  cycleLength = 2,        // NEW: seconds for full loop
+  animate = true,      // NEW: whether to auto-animate
 }) {
   const ref = useRef<THREE.Object3D>(null)
-  const lastFlipTime = useRef(0)
   const { scene } = useGLTF(url) as GLTF
+  const isAnimating = useRef(false)
+  const lastTrigger = useRef(0)
 
   // Apply bright metallic color
   scene.traverse((child) => {
@@ -51,20 +56,21 @@ function Plug({
     }
   })
 
-  /* ------------------------------
-     Center geometry so rotation is correct
-  --------------------------------*/
+  // Center geometry so rotation is correct
   const box = new THREE.Box3().setFromObject(scene)
   const center = new THREE.Vector3()
   box.getCenter(center)
   scene.position.sub(center)
+  useEffect(() => {
+    if (ref.current) {
+        ref.current.position.set(0,0,0)
+        isAnimating.current = false
+    }
+  }, [animate])
 
-  const isAnimating = useRef(false)
-
-  /* ------------------------------
-     GSAP flip animation
-  --------------------------------*/
-  const animateFlip = () => {
+  const animateFlip = (e?: THREE.Event) => {
+    //@ts-ignore
+    e?.stopPropagation()
     if (!ref.current || isAnimating.current) return
     isAnimating.current = true
 
@@ -81,7 +87,6 @@ function Plug({
       }
     })
 
-    // Pull out
     tl.to(obj.position, {
       x: pullPos.x,
       y: pullPos.y,
@@ -90,7 +95,6 @@ function Plug({
       ease: "power2.out"
     })
 
-    // Rotate using Euler angles from rotationAmount
     tl.to(obj.rotation, {
       x: "+=" + rotationAmount.x,
       y: "+=" + rotationAmount.y,
@@ -99,7 +103,6 @@ function Plug({
       ease: "power2.inOut"
     })
 
-    // Reinsert
     tl.to(obj.position, {
       x: startPos.x,
       y: startPos.y,
@@ -109,51 +112,41 @@ function Plug({
     })
   }
 
+  /* ------------------------------
+     Sequenced flip trigger
+  --------------------------------*/
   useFrame(({ clock }) => {
-  if (!ref.current) return
+    if (!ref.current) return
 
-  const t = clock.getElapsedTime()
+    const t = clock.getElapsedTime()
 
-  // Noise-based flip trigger
-  if (!isAnimating.current) {
-    const noise = Math.sin(t * noiseFrequency + center.x * 10)
+    // Compute phase offset for this plug
+    const offset = (side / totalSides) * cycleLength
+    const phase = (t - offset + cycleLength) % cycleLength
 
-    const now = t
-    const cooldown = 5 // seconds between flips
-
-    if (noise > 0.95 && now - lastFlipTime.current > cooldown) {
-      lastFlipTime.current = now
-      animateFlip()
+    // Trigger window: first 0.1s of each plug's phase
+    if (!isAnimating.current && phase < 0.1 && animate) {
+      // Prevent double-triggering inside the same window
+      if (t - lastTrigger.current > 0.5) {
+        lastTrigger.current = t
+        animateFlip()
+      }
     }
-  }
-
-  // Pulse animation (gated)
-  if (!isAnimating.current) {
-    const raw = Math.sin(t * 1.5)
-    const eased = THREE.MathUtils.smoothstep(raw, -1, 1)
-    const slide = eased * 0.2
-
-    ref.current.position.set(
-      position[0] + direction[0] * slide,
-      position[1] + direction[1] * slide,
-      position[2] + direction[2] * slide
-    )
-  }
-})
+  })
 
   return (
     <primitive
       ref={ref}
       object={scene}
       position={position}
-      onClick={animateFlip}
+      onClick={(e) => animateFlip(e)}
     />
   )
 }
 /* ------------------------------
    Main Scene
 --------------------------------*/
-function Scene() {
+function Scene({animate}: {animate?: boolean}) {
   return (
     <>
       {/* Background */}
@@ -179,6 +172,8 @@ function Scene() {
             direction={[1, 0, 0]}
             rotationAmount={new THREE.Vector3(Math.PI/2, 0, 0)}
             animationDistance={3}
+            side={0}
+            animate={animate}
         />
         <Plug
             url="/models/day14/cylinder_plug.glb"
@@ -186,7 +181,9 @@ function Scene() {
             position={[0, 0, 0]}
             direction={[0, 0, -1]}
             rotationAmount={new THREE.Vector3(0, 0, Math.PI)}
-            animationDistance={1.5}
+            animationDistance={1.25}
+            side={1}
+            animate={animate}
         />
         <Plug
             url="/models/day14/heart_plug.glb"
@@ -194,7 +191,9 @@ function Scene() {
             position={[0, 0, 0]}
             direction={[-1, 0, 0]}
             rotationAmount={new THREE.Vector3(Math.PI*2, 0, 0)}
-            animationDistance={1.5}
+            animationDistance={1.25}
+            side={2}
+            animate={animate}
         />
         <Plug
             url="/models/day14/plus_plug.glb"
@@ -203,6 +202,8 @@ function Scene() {
             direction={[0, 0, 1]}
             rotationAmount={new THREE.Vector3(0, 0, Math.PI/2)}
             animationDistance={1.5}
+            side={3}
+            animate={animate}
         />
         <Plug
             url="/models/day14/star_plug.glb"
@@ -211,6 +212,8 @@ function Scene() {
             direction={[0, 1, 0]}
             rotationAmount={new THREE.Vector3(0, Math.PI / 2.5, 0)}
             animationDistance={1.5}
+            side={4}
+            animate={animate}
         />
         <Plug
             url="/models/day14/triangle_plug.glb"
@@ -219,6 +222,8 @@ function Scene() {
             direction={[0, -1, 0]}
             rotationAmount={new THREE.Vector3(0, Math.PI/1.5, 0)}
             animationDistance={1.5}
+            side={5}
+            animate={animate}   
         />
         </group>
     </>
@@ -232,7 +237,7 @@ const Day14Project = () => {
 
   // Initial camera pull-back
   useEffect(() => {
-    camera.position.set(3, 2, -20)   // pulled back further
+    camera.position.set(-18, 6, 20)   // pulled back further
     camera.lookAt(0, 0, 0)
   }, [])
 
@@ -265,8 +270,8 @@ const Day14Project = () => {
 
   return (
     <>
-      <PromptHint prompt={'Perfect Fit'} hint={'click to flip shape'} color="black" />
-      <Scene />
+      <PromptHint prompt={'Perfect Fit'} hint={'double click to start/stop animation, click shape to animate'} color="black" />
+      <Scene animate={autoOrbit} />
       <CompletedSketch day={14} />
       <OrbitControls enabled={controlsEnabled} />
     </>
