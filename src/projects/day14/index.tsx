@@ -153,15 +153,14 @@ function Scene({ animate }: { animate?: boolean }) {
       <color attach="background" args={['#d2b48c']} />
 
       {/* Lighting */}
-      <ambientLight intensity={0.6} />
+      <ambientLight intensity={0.8} />
       <directionalLight
         position={[5, 5, 5]}
         intensity={1.2}
-        castShadow
       />
       <Environment preset="city" />
 
-      <group position={[0, 0, 0]} rotation={[Math.PI / 2, Math.PI / 2, 0]}>
+      <group position={[0, 0, 0]} rotation={[Math.PI / 2, -Math.PI / 2, 0]}>
         <ShapeBox />
 
         {/* Plugs */}
@@ -241,7 +240,7 @@ const Day14Project = () => {
 
   // Initial camera pull-back
   useEffect(() => {
-    camera.position.set(-18, 6, 20)   // pulled back further
+    camera.position.set(18, 6, 20)   // pulled back further
     camera.lookAt(0, 0, 0)
   }, [])
 
