@@ -45,25 +45,19 @@ function BackWall() {
       <group
         ref={groupRef}
         position={[x, y, 0]}
-        rotation={[Math.PI / 2, tilt + (index + 1) * 0.03, 0]}
+        rotation={[Math.PI / 2, tilt + angle * 0.03, 0]}
       >
         {/* The panel */}
         <mesh>
           <boxGeometry args={[0.15, height, 1]} />
-          <meshPhysicalMaterial
+          <meshStandardMaterial
             color={color}
             roughness={0.1}
             metalness={0.1}
-            ior={1.4}
-            iridescence={0.8}
-            iridescenceIOR={1.3}
             emissive={color}
-            emissiveIntensity={0.15}          
+            emissiveIntensity={.35}          
           />
         </mesh>
-
-        
-
 
         <spotLight
             ref={lightRef}
@@ -132,7 +126,7 @@ function BackWall() {
         <pointLight position={[0,0,3.5]} intensity={5} decay={2}/>
   
         {/* The sculpture */}
-        <Sculpture count={16} />
+        <Sculpture count={24} />
         <OrbitControls/>
       </>
     )
