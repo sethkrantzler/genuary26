@@ -85,7 +85,7 @@ function BackWall() {
       </group>
     )
   }
-  function Sculpture({ count = 12 }) {
+  function Sculpture({ count }) {
     const panels = Array.from({ length: count })
     const groupRef = useRef<THREE.Group>();
 
@@ -120,7 +120,7 @@ function BackWall() {
 
     return (
       <>
-        <PromptHint prompt={'Invisible object / only shadows'} hint={'drag to explore'} color='black' />
+        <PromptHint prompt={'Invisible object / only shadows'} hint={'drag to explore'} color='white' />
         <CompletedSketch day={15} />
   
         {/* Back wall for shadows */}
