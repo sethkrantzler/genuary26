@@ -1,14 +1,15 @@
 import React from 'react';
 import { Html } from '@react-three/drei';
+import { PromptHint } from '../../components/PromptHint';
+import { CompletedSketch, FullScreenShader } from '../../utils/utils';
 
 const Day17Project = () => {
     return (
-        <Html position={[0, 0, 0]} center>
-            <div style={{ color: 'black', background: 'white', padding: '10px', borderRadius: '5px' }}>
-                <h1>Project for Day 17</h1>
-                <p>This is an HTML overlay rendered inside the 3D scene.</p>
-            </div>
-        </Html>
+        <>
+            <PromptHint prompt="Wallpaper Group" color="black"/>
+            <CompletedSketch day={17} />
+            <FullScreenShader fragmentPath={`${import.meta.env.BASE_URL}shaders/day17.glsl`} />
+        </>
     );
 };
 
