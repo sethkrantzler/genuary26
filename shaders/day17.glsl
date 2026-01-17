@@ -2,10 +2,61 @@ precision highp float;
 
 uniform float uTime;
 uniform vec2 uResolution;
+uniform vec2 uMouse;
+uniform float uImpact;
+
 
 varying vec2 vUv;
 
 #define HEX vec2(1., 1.73)
+
+// ------------------------------------------------------------
+// Hash & helpers
+// ------------------------------------------------------------
+float hash(vec2 p) {
+    // simple but decent 2D hash
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+}
+
+vec2 fade(vec2 t) {
+    return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
+}
+
+// ------------------------------------------------------------
+// 2D Perlin noise
+// ------------------------------------------------------------
+float perlinNoise(vec2 p) {
+    vec2 pi = floor(p);
+    vec2 pf = fract(p);
+
+    // corners
+    float a = hash(pi + vec2(0.0, 0.0));
+    float b = hash(pi + vec2(1.0, 0.0));
+    float c = hash(pi + vec2(0.0, 1.0));
+    float d = hash(pi + vec2(1.0, 1.0));
+
+    // gradients (map hash to gradient directions)
+    vec2 ga = normalize(vec2(cos(a * 6.2831), sin(a * 6.2831)));
+    vec2 gb = normalize(vec2(cos(b * 6.2831), sin(b * 6.2831)));
+    vec2 gc = normalize(vec2(cos(c * 6.2831), sin(c * 6.2831)));
+    vec2 gd = normalize(vec2(cos(d * 6.2831), sin(d * 6.2831)));
+
+    float va = dot(ga, pf - vec2(0.0, 0.0));
+    float vb = dot(gb, pf - vec2(1.0, 0.0));
+    float vc = dot(gc, pf - vec2(0.0, 1.0));
+    float vd = dot(gd, pf - vec2(1.0, 1.0));
+
+    vec2 w = fade(pf);
+
+    float x1 = mix(va, vb, w.x);
+    float x2 = mix(vc, vd, w.x);
+    float n  = mix(x1, x2, w.y);
+
+    // map from [-1,1] to [0,1]
+    return 0.5 * n + 0.5;
+}
 
 // ------------------------------------------------------------
 // Anti-aliased step (Shadertoy-safe)
@@ -104,32 +155,53 @@ vec2 hexSym(vec2 p) {
 }
 
 void main() {
+    // --- 1. Centered, aspect-correct UVs ---
     vec2 uv = vUv - 0.5;
     uv.x *= uResolution.x / uResolution.y;
 
+    // --- 2. Global time + breathing grid scale ---
     float t = uTime * 0.5;
-    float grid = 12.0 + 3. * sin(0.5*t);
+    float grid = 12.0 + 3. * sin(0.5 * t);
     uv *= grid;
 
+    // --- 3. Hex tiling: local coords + tile ID ---
     vec4 h = HexCoords(uv);
     vec2 gv = h.xy;
+    vec2 id = h.zw;
 
-    // 6-way symmetry
+    // --- 4. Mouse in same space ---
+    vec2 m = uMouse - 0.5;
+    m.x *= uResolution.x / uResolution.y;
+
+    // --- 5. Distance from tile center to mouse ---
+    float dist = length(id - m * grid);
+
+    // --- 6. Falloff: only tiles near mouse grow ---
+    float influence = smoothstep(4.5, 0.0, dist);
+
+    // --- 7. Scale tile-local coords (enlarge tile) ---
+    float scale = 1.0 + influence * uImpact;
+    gv /= scale;
+
+    // --- 8. 6-way symmetry ---
     vec2 p = hexSym(gv);
 
-    // small animated offset using tile id
+    // --- 9. Original animated offset ---
     p += smoothstep(cos(sin(length(h.wz)) + t), 1.0, 0.1);
 
-    // SDFs
+    // --- 10. SDF motif ---
     float d1 = sdMoon(p, 0.4, 0.5, 0.55);
     float d2 = sdBlobbyCross(p * 2.0, 0.9);
     float d  = min(d1, d2);
 
+    // --- 11. Fill + outline ---
     float fill    = smoothstep(0.9, -0.9, d);
     float outline = strokeSDF(d, 0.1);
 
+    // --- 12. Mask to hex tile ---
     float hexMask = smoothstep(0.9, -0.91, -HexDist(gv));
 
+    // --- 13. Color ---
     vec3 col = vec3(0.0);
     col += fill * vec3(0.8, 0.4, 0.9);
     col += outline * vec3(1.0, 0.9, 0.2);
