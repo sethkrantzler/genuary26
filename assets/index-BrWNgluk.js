@@ -1,0 +1,1 @@
+import{j as r,c as a,as as e}from"./main-DpZjkSxq.js";import{P as t}from"./PromptHint-CLTRYK6_.js";const p=()=>r.jsxs(r.Fragment,{children:[r.jsx(t,{prompt:"Wallpaper Group",color:"white"}),r.jsx(a,{day:17}),r.jsx(e,{fragmentPath:"/genuary26/shaders/day17.glsl"})]});export{p as default};
