@@ -1,14 +1,15 @@
 import React from 'react';
-import { Html } from '@react-three/drei';
+import { Html, OrbitControls } from '@react-three/drei';
+import { PromptHint } from '../../components/PromptHint';
+import { CompletedSketch, FullScreenShader } from '../../utils/utils';
 
 const Day18Project = () => {
     return (
-        <Html position={[0, 0, 0]} center>
-            <div style={{ color: 'black', background: 'white', padding: '10px', borderRadius: '5px' }}>
-                <h1>Project for Day 18</h1>
-                <p>This is an HTML overlay rendered inside the 3D scene.</p>
-            </div>
-        </Html>
+        <>
+            <PromptHint prompt={"unexpected path following one rule"} hint={"drag to change spirograph"} color="white" />
+            <CompletedSketch day={18} />
+            <FullScreenShader fragmentPath={`${import.meta.env.BASE_URL}shaders/day18.glsl`}/>
+        </>
     );
 };
 

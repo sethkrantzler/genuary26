@@ -455,6 +455,7 @@ export const DEFAULT_VERTEX_SHADER: string = /* glsl */ `
   }
 `;
 
+// FullScreenShader.tsx
 type FullScreenShaderProps = {
   fragmentPath: string;
   uniforms?: Record<string, THREE.IUniform>;
@@ -468,11 +469,12 @@ export const FullScreenShader: React.FC<FullScreenShaderProps> = ({
   transparent = false,
   onClick
 }) => {
-  const { viewport } = useThree();
+  const { viewport, gl } = useThree();
   const materialRef = useRef<THREE.ShaderMaterial | null>(null);
+  const mouse = useRef(new THREE.Vector2());
   const [fragmentShader, setFragmentShader] = useState<string | null>(null);
 
-  // Load fragment shader source from a file path
+  // Load fragment shader
   useEffect(() => {
     let cancelled = false;
 
@@ -483,45 +485,54 @@ export const FullScreenShader: React.FC<FullScreenShaderProps> = ({
     };
 
     load();
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true };
   }, [fragmentPath]);
 
-  // Base uniforms: time + resolution, plus user-provided
+  // Merge uniforms
   const mergedUniforms = useMemo(() => {
     return {
       uTime: { value: 0 },
       uResolution: {
         value: new THREE.Vector2(viewport.width, viewport.height),
       },
-      ...uniforms,
+      uMouse: { value: new THREE.Vector2(0, 0) },
+      ...uniforms, // user-provided uniforms override defaults
     };
   }, [viewport.width, viewport.height, uniforms]);
 
-  // Animate uTime and keep uResolution in sync with viewport
+  // Animate time + resolution
   useFrame(({ clock }) => {
     if (!materialRef.current) return;
     const u = materialRef.current.uniforms;
 
-    if (u.uTime) {
-      u.uTime.value = clock.getElapsedTime();
-    }
-    if (u.uResolution) {
-      (u.uResolution.value as THREE.Vector2).set(
-        viewport.width,
-        viewport.height
-      );
-    }
+    u.uTime.value = clock.getElapsedTime();
+    u.uResolution.value.set(viewport.width, viewport.height);
   });
+
+  // Smooth mouse
+  useFrame(() => {
+    if (!materialRef.current) return;
+    materialRef.current.uniforms.uMouse.value.lerp(mouse.current, 0.15);
+  });
+
+  // Track mouse globally
+  useEffect(() => {
+    const handleMove = (e: PointerEvent) => {
+      const rect = gl.domElement.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = 1.0 - (e.clientY - rect.top) / rect.height;
+      mouse.current.set(x, y);
+    };
+
+    window.addEventListener("pointermove", handleMove);
+    return () => window.removeEventListener("pointermove", handleMove);
+  }, []);
 
   if (!fragmentShader) return null;
 
   return (
-    <mesh position={[0, 0, 0]} onPointerDown={onClick}>
-      {/* Plane sized exactly to the current viewport */}
-      <planeGeometry args={[viewport.width, viewport.height, 1, 1]} />
+    <mesh position={[0, 0, 0]} onDoubleClick={onClick}>
+      <planeGeometry args={[viewport.width, viewport.height]} />
       <shaderMaterial
         ref={materialRef}
         vertexShader={DEFAULT_VERTEX_SHADER}
