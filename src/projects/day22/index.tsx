@@ -19,7 +19,8 @@ const generateSpiral = ({
     for (let s = 0; s < spirals; s++) {
         const color = palette[s % palette.length];
         for (let i = 0; i < totalPoints; i++) {
-            const t = i / totalPoints;
+            //const t = Math.pow((i / totalPoints), 0.75);
+            const t = i/totalPoints;
             const angle = s * spacing + t * turns * Math.PI * 2;
             const r = radiusStart + t * (radiusEnd - radiusStart);
             circles.push({ x: r * Math.cos(angle), y: r * Math.sin(angle), r: circleRadius, color });
@@ -61,7 +62,7 @@ const PATTERNS = [
     () => generateSpiral({
         turns: 3,
         pointsPerTurn: 50,
-        radiusStart: 10,
+        radiusStart: 20,
         radiusEnd: 100,
         circleRadius: 10,
         spirals: 3,
