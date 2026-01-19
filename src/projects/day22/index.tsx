@@ -61,7 +61,7 @@ const PATTERNS = [
     () => generateSpiral({
         turns: 3,
         pointsPerTurn: 50,
-        radiusStart: 20,
+        radiusStart: 10,
         radiusEnd: 100,
         circleRadius: 10,
         spirals: 3,
