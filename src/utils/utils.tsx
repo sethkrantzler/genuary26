@@ -738,4 +738,36 @@ export function createPathDoubleSpring({
   }
 
   return new DoubleSpringCurve();
+} 
+
+export function UseOrthoCamera({position}: {position: THREE.Vector3}) {
+    const { camera, set, size } = useThree();
+
+    useEffect(() => {
+        // Save old camera
+        const oldCam = camera;
+        const aspect = size.width / size.height;
+
+        // Create orthographic camera
+        const orthoCam = new THREE.OrthographicCamera(
+            -aspect * 5,  // left
+            aspect * 5,   // right
+            5,            // top
+            -5,           // bottom
+            0.1,
+            1000
+        );
+        orthoCam.position.set(position.x, position.y, position.z);
+        orthoCam.lookAt(0, 0, 0);
+
+        // Replace active camera
+        set({ camera: orthoCam });
+
+        return () => {
+            // Restore original perspective camera
+            set({ camera: oldCam });
+        };
+    }, []);
+
+    return null;
 }
