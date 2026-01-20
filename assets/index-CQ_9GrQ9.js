@@ -1,0 +1,1 @@
+import{j as r,as as e}from"./main-DtFncjae.js";import{P as s}from"./PromptHint-CKCi1--5.js";const o=()=>r.jsxs(r.Fragment,{children:[r.jsx(s,{prompt:"a single line",color:"grey"}),r.jsx(e,{fragmentPath:"/genuary26/shaders/day20.glsl"})]});export{o as default};
