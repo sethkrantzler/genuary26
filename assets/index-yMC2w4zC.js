@@ -1,1 +1,0 @@
-import{j as r,c as t,as as e}from"./main-DtFncjae.js";import{P as a}from"./PromptHint-CKCi1--5.js";const m=()=>r.jsxs(r.Fragment,{children:[r.jsx(a,{prompt:"16x16",hint:"drag to explore",color:"white"}),r.jsx(t,{day:19}),r.jsx(e,{fragmentPath:"/genuary26/shaders/day19.glsl"})]});export{m as default};
