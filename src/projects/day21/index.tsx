@@ -4,8 +4,8 @@ import { PromptHint } from '../../components/PromptHint';
 import { Environment, Html, OrbitControls, useTexture } from '@react-three/drei';
 import gsap from 'gsap';
 import { useFrame, useThree } from '@react-three/fiber';
-import { BackgroundShader, DifferenceEffect } from '../../utils/utils';
-import { EffectComposer } from '@react-three/postprocessing';
+import { BackgroundShader, CompletedSketch, DifferenceEffect } from '../../utils/utils';
+import { EffectComposer, Pixelation } from '@react-three/postprocessing';
 
 // --------------------------------------------------
 // ARROW COMPONENT
@@ -331,6 +331,7 @@ const Day21Project = () => {
     return (
         <>
             <PromptHint prompt="Bauhaus Poster" color="white" />
+            <CompletedSketch day={21}/>
             <Scene />
             <OrbitControls />
             <EffectComposer>
