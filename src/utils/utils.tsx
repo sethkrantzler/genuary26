@@ -1,5 +1,5 @@
-import { useFrame, useThree } from '@react-three/fiber';
-import { EffectComposer, RenderPass, ShaderPass } from 'postprocessing';
+import { extend, useFrame, useThree } from '@react-three/fiber';
+import { BlendFunction, Effect, EffectComposer, RenderPass, ShaderPass } from 'postprocessing';
 import { Ref, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 
@@ -544,6 +544,113 @@ export const FullScreenShader: React.FC<FullScreenShaderProps> = ({
   );
 };
 
+type BackgroundShaderProps = {
+  fragmentPath: string;
+  uniforms?: Record<string, THREE.IUniform>;
+};
+
+export const BackgroundShader: React.FC<BackgroundShaderProps> = ({
+  fragmentPath,
+  uniforms = {}
+}) => {
+  const { camera, viewport, gl } = useThree();
+  const materialRef = useRef<THREE.ShaderMaterial | null>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
+  const mouse = useRef(new THREE.Vector2());
+  const [fragmentShader, setFragmentShader] = useState<string | null>(null);
+
+  // Load fragment shader
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      const res = await fetch(fragmentPath);
+      const text = await res.text();
+      if (!cancelled) setFragmentShader(text);
+    };
+
+    load();
+    return () => { cancelled = true };
+  }, [fragmentPath]);
+
+  // Merge uniforms
+  const mergedUniforms = useMemo(() => {
+    return {
+      uTime: { value: 0 },
+      uResolution: {
+        value: new THREE.Vector2(viewport.width, viewport.height),
+      },
+      uMouse: { value: new THREE.Vector2(0, 0) },
+      ...uniforms,
+    };
+  }, [viewport.width, viewport.height, uniforms]);
+
+  // Animate time + resolution
+  useFrame(({ clock }) => {
+    if (!materialRef.current) return;
+    const u = materialRef.current.uniforms;
+
+    u.uTime.value = clock.getElapsedTime();
+    u.uResolution.value.set(viewport.width, viewport.height);
+  });
+
+  useFrame(() => {
+  if (!meshRef.current) return;
+
+  const dist = 50; // distance in front of camera
+
+  // 1. Camera forward direction
+  const forward = new THREE.Vector3();
+  camera.getWorldDirection(forward);
+
+  // 2. Position plane in front of camera
+  meshRef.current.position.copy(camera.position).add(forward.multiplyScalar(dist));
+
+  // 3. Keep it screen-aligned
+  meshRef.current.quaternion.copy(camera.quaternion);
+
+  // 4. Compute plane size so it fills the screen
+  const height = 2 * Math.tan(((camera as THREE.PerspectiveCamera).fov * Math.PI) / 180 / 2) * dist;
+  const width = height * (camera as THREE.PerspectiveCamera).aspect;
+
+  meshRef.current.scale.set(width, height, 1);
+});
+
+  // Smooth mouse
+  useFrame(() => {
+    if (!materialRef.current) return;
+    materialRef.current.uniforms.uMouse.value.lerp(mouse.current, 0.15);
+  });
+
+  // Track mouse globally
+  useEffect(() => {
+    const handleMove = (e: PointerEvent) => {
+      const rect = gl.domElement.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = 1.0 - (e.clientY - rect.top) / rect.height;
+      mouse.current.set(x, y);
+    };
+
+    window.addEventListener("pointermove", handleMove);
+    return () => window.removeEventListener("pointermove", handleMove);
+  }, []);
+
+  if (!fragmentShader) return null;
+
+  return (
+    <mesh ref={meshRef}>
+      <planeGeometry args={[1, 1]} />
+      <shaderMaterial
+        ref={materialRef}
+        vertexShader={DEFAULT_VERTEX_SHADER}
+        fragmentShader={fragmentShader}
+        uniforms={mergedUniforms}
+        transparent={false}
+      />
+    </mesh>
+  );
+};
+
 // --------------------------------------------------
 // ROUNDED RECTANGLE PATH (CurvePath)
 // --------------------------------------------------
@@ -770,4 +877,72 @@ export function UseOrthoCamera({position}: {position: THREE.Vector3}) {
     }, []);
 
     return null;
+}
+
+export class DifferenceEffectImpl extends Effect {
+  constructor({ width = 0.5, color = "orange" } = {}) {
+
+    const fragmentShader = /* glsl */ `
+      uniform vec3 uColor;
+      uniform float uWidth;
+      uniform vec2 uMouse;
+      uniform float uTime;
+
+      float toothSym(float x) {
+        return abs(fract(x) - 0.5) * 2.0;
+      }
+
+      void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
+
+        float freq = 15.0;
+        float amp  = 0.075;
+
+        // Time‑animated symmetric wobble
+        float wob = (toothSym(uv.y * freq + uTime * 0.5) - 0.5) * amp * 2.0;
+
+        wob *= mix(0.5, 1.5, uMouse.x);
+
+        float boundary = uWidth + wob;
+
+        if (uv.x >= boundary) {
+          outputColor = inputColor;
+          return;
+        }
+
+        vec3 diff = abs(inputColor.rgb - uColor);
+
+        float shift = uMouse.x * uWidth;
+
+        float g = smoothstep(0.0 + shift, uWidth + shift, uv.x);
+
+        vec3 grad = mix(
+          vec3(0.2, 0.6, 1.0),
+          uColor,
+          g
+        );
+
+        outputColor = vec4(diff * grad, 1.0);
+      }
+    `;
+
+    super("DifferenceEffect", fragmentShader, {
+      blendFunction: BlendFunction.NORMAL,
+      uniforms: new Map<string, THREE.Uniform<any>>([
+        ["uColor", new THREE.Uniform(new THREE.Color(color))],
+        ["uWidth", new THREE.Uniform(width)],
+        ["uMouse", new THREE.Uniform(new THREE.Vector2())],
+        ["uTime", new THREE.Uniform(0)],
+      ]),
+    });
+  }
+}
+
+extend({ DifferenceEffectImpl });
+
+export function DifferenceEffect(props: { width?: number; color?: string }) {
+
+  return (
+    // @ts-ignore
+    <differenceEffectImpl {...props} />
+  );
 }
