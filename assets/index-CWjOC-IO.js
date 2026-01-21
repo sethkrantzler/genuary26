@@ -1,0 +1,1 @@
+import{j as r,c as t,at as e}from"./main-BAg9_iEC.js";import{P as a}from"./PromptHint-D-k2SNjV.js";const m=()=>r.jsxs(r.Fragment,{children:[r.jsx(a,{prompt:"16x16",hint:"drag to explore",color:"white"}),r.jsx(t,{day:19}),r.jsx(e,{fragmentPath:"/genuary26/shaders/day19.glsl"})]});export{m as default};
