@@ -98,7 +98,7 @@ void main() {
     vec3 wood = vec3(0.40, 0.26, 0.12);
 
     // Gradient factor (0 → 1)
-    float gx = smoothstep(0.5, 1.0, vUv.x);
+    float gx = smoothstep(0.5*mouseInfluence, 1.0, vUv.x);
 
 
     // Final background gradient
