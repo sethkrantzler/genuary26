@@ -163,6 +163,7 @@ function ArrowCube({ size = 4, padding = 0.2, textures }) {
         const axes = ["x", "y", "z"];
     
         const spin = () => {
+            if (!groupRef.current) return;
             const axis = axes[Math.floor(Math.random() * axes.length)];
             const direction = Math.random() < 0.5 ? 1 : -1;
     
@@ -178,7 +179,7 @@ function ArrowCube({ size = 4, padding = 0.2, textures }) {
     
         spin();
     
-        return () => gsap.killTweensOf(groupRef.current.rotation);
+        return () => gsap.killTweensOf(groupRef?.current?.rotation);
     }, []);
 
     return (
@@ -245,8 +246,9 @@ function BillboardLogo() {
         if (!logoRef.current) return;
 
         const spin = () => {
+            if (!logoRef.current) return;
             // Ensure it starts facing the camera baseline
-            logoRef.current.lookAt(camera.position.x == 0 ? new THREE.Vector3(1,1,1) : camera.position);
+            logoRef?.current?.lookAt(camera.position.x == 0 ? new THREE.Vector3(1,1,1) : camera.position);
             isAnimating.current = true;
         
             // Randomly choose axis: "y" or "z"
@@ -268,7 +270,7 @@ function BillboardLogo() {
 
         setTimeout(() => spin(), 2000);
 
-        return () => gsap.killTweensOf(logoRef.current?.rotation);
+        return () => gsap.killTweensOf(logoRef?.current?.rotation);
     }, []);
 
     return (
@@ -350,7 +352,7 @@ const Day21Project = () => {
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "flexStart",
-                        marginTop: '-30vh',
+                        marginTop: '-32vh',
                         marginLeft: '-1.75vw'
                     }}
                 >
