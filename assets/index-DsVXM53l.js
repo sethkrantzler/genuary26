@@ -1,0 +1,1 @@
+import{j as r,c as e,at as t}from"./main-DYQQrMzV.js";import{P as a}from"./PromptHint-CiHTkuby.js";const n=()=>r.jsxs(r.Fragment,{children:[r.jsx(a,{prompt:"a single line",hint:"drag to break my heart",color:"grey"}),r.jsx(e,{day:20}),r.jsx(t,{fragmentPath:"/genuary26/shaders/day20.glsl"})]});export{n as default};
