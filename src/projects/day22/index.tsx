@@ -2,6 +2,8 @@ import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import { Html } from '@react-three/drei';
 import { PromptHint } from '../../components/PromptHint';
 import { CompletedSketch, noise } from '../../utils/utils';
+import { useThree } from '@react-three/fiber';
+import { Color } from 'three';
 
 const generateSpiral = ({
     turns = 4,
@@ -71,6 +73,7 @@ const PATTERNS = [
 ];
 
 const Day22Project = () => {
+    const {scene} = useThree();
     const [patternIndex, setPatternIndex] = useState(0);
     const [visibleCount, setVisibleCount] = useState(0);
     const [isAnimating, setIsAnimating] = useState(true);
@@ -82,7 +85,7 @@ const Day22Project = () => {
         setIsReady(false);     // prevent flicker
         return PATTERNS[patternIndex % PATTERNS.length]();
     }, [patternIndex]);
-
+    useEffect(() => {scene.background = new Color('antiquewhite')}, [])
     // Animate circles in
     useEffect(() => {
         if (!isAnimating) {
@@ -129,12 +132,12 @@ const Day22Project = () => {
             <PromptHint
                 prompt="Plotter Ready"
                 hint="tap to change pattern, double tap to turn off animation"
-                color="black"
+                color="orange"
             />
 
             <CompletedSketch day={22} />
 
-            <Html fullscreen>
+            <Html fullscreen style={{pointerEvents: 'none'}}>
                 <div
                     style={{
                         width: "100%",
@@ -143,10 +146,11 @@ const Day22Project = () => {
                         flexDirection: "column",
                         justifyContent: "center",
                         alignItems: "center",
-                        background: "antiquewhite",
+                        background: "transparent",
                         fontFamily: "sans-serif",
                         cursor: "pointer",
-                        fontWeight: "bold"
+                        fontWeight: "bold",
+                        zIndex: "0"
                     }}
                 >
                     {!isAnimating && <div>SHAPE COUNT: {circles.length}</div>}
@@ -159,6 +163,7 @@ const Day22Project = () => {
                         viewBox="-200 -200 400 400"
                         stroke="black"
                         fill="none"
+                        style = {{pointerEvents: 'auto'}}
                     >
                         {isReady &&
                             circles.slice(0, visibleCount).map((c, i) => (
