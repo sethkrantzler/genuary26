@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Environment, Html, OrbitControls } from '@react-three/drei';
+import { Environment, OrbitControls } from '@react-three/drei';
 import { PromptHint } from '../../components/PromptHint';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import { noise } from '../../utils/utils';
+import { CompletedSketch, noise } from '../../utils/utils';
 
 function Panel({ index, total, radius = 5.5, thickness, randomizeColor }) {
     const groupRef = useRef<THREE.Group>();
@@ -132,13 +132,12 @@ const Day23Project = () => {
 
     return (
         <>
-            <PromptHint prompt="transparency" />
-            {/* Ambient + directional for subtle fill */}
+            <PromptHint prompt="transparency" hint="double tap to change glass thickness" />
             <ambientLight intensity={1} />
             <Environment preset='studio' />
-            {/* The sculpture */}
             <Sculpture count={100} />
             <OrbitControls/>
+            <CompletedSketch day={23} />
         </>
     );
 };
