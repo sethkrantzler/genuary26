@@ -20,7 +20,7 @@ function Panel({ index, total, radius = 5.5, thickness, randomizeColor }) {
     const twist = Math.PI*4 * (index / total);
   
     // Color gradient
-    const hue = randomizeColor ? noise((index / total) * 360, index) : (index / total) * 360;
+    const hue = randomizeColor ? 360*noise((index / total) * 360, index) : (index / total) * 360;
     const color = `hsl(${hue}, 80%, 60%)`;
   
     useFrame(() => {
