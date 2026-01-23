@@ -21,7 +21,7 @@ const Day24Project = () => {
      }, [])
     return (
         <>
-            <PromptHint prompt="perfectionist's nightmare" hint="drag to overlap all dots"/>
+            <PromptHint prompt="perfectionist's nightmare" hint="drag to overlap all dots, double click to change style" color="black" timeout={5}/>
             <CompletedSketch day={24} />
             <FullScreenShader 
                 uniforms={{
