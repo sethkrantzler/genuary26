@@ -52,10 +52,10 @@ void main() {
 
     // Shadow offset
     vec2 shadowOffset = vec2(uMouse-0.5);
-    shadowOffset += 0.1*hash(id);
+    shadowOffset += 0.025*hash(id);
     // Signed distances
     float sdfFront  = sdfCircle(p, r);
-    float sdfShadow = sdfCircle(p - shadowOffset, r);
+    float sdfShadow = sdfCircle(p - shadowOffset, r-0.01);
 
     // Anti-aliased fill masks
     float edge = fwidth(sdfFront) * 1.5;
@@ -118,7 +118,7 @@ void main() {
 
     if (uPattern == 2) {
         d = length(shadowOffset);
-        blend = smoothstep(0.45, 0.01, d);
+        blend = smoothstep(0.4, 0.00, d);
         vec3 frontColor = iqPalette(
             paletteT,
             vec3(0.5),
