@@ -139,7 +139,7 @@ void main() {
 
             vec3 ringColor = palette(fract(i * 0.3 + nearestN.x)+0.3*sin(0.5*t));
 
-            col += 10.5 * ringMask * ringColor;
+            col += 5.5 * ringMask * ringColor;
         }
     }
 
@@ -175,7 +175,7 @@ void main() {
 
             vec3 ringColor = palette(fract(i * 0.3 + nearestN.x)+0.2*sin(0.5*t));
 
-            col += 10.5 * ringMask * ringColor;
+            col += 5.5 * ringMask * ringColor;
         }
     }
 
