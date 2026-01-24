@@ -1,14 +1,34 @@
-import React from 'react';
-import { Html } from '@react-three/drei';
+import React, { useEffect, useRef } from 'react';
+import { PromptHint } from '../../components/PromptHint';
+import { CompletedSketch, FullScreenShader } from '../../utils/utils';
 
 const Day25Project = () => {
+     // Stable uniform object
+     const pattern = useRef({ value: 1 });
+  
+    const maxPattern = 3;
+   
+     const handleDoubleClick = () => {
+        pattern.current.value = (pattern.current.value + 1 ) % maxPattern;
+     };
+
+     useEffect(() => {
+        window.addEventListener("dblclick", handleDoubleClick);
+
+        return () => window.removeEventListener("dblclick", handleDoubleClick)
+
+     }, [])
     return (
-        <Html position={[0, 0, 0]} center>
-            <div style={{ color: 'black', background: 'white', padding: '10px', borderRadius: '5px' }}>
-                <h1>Project for Day 25</h1>
-                <p>This is an HTML overlay rendered inside the 3D scene.</p>
-            </div>
-        </Html>
+        <>
+            <PromptHint prompt="Organic Geometry" hint="double tap to change pattern"/>
+            <FullScreenShader
+                fragmentPath={`${import.meta.env.BASE_URL}shaders/day25.glsl`}
+                uniforms={{
+                    uPattern: pattern.current,
+                }}
+            />
+            <CompletedSketch day={25} />
+        </>
     );
 };
 
