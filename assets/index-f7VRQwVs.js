@@ -1,0 +1,1 @@
+import{j as e,c as r,at as t}from"./main-BcU0ltZ_.js";import{P as a}from"./PromptHint-BisR-SXM.js";const n=()=>e.jsxs(e.Fragment,{children:[e.jsx(a,{prompt:"unexpected path following one rule",hint:"drag to change spirograph",color:"white"}),e.jsx(r,{day:18}),e.jsx(t,{fragmentPath:"/genuary26/shaders/day18.glsl"})]});export{n as default};
