@@ -4,7 +4,7 @@ import { CompletedSketch } from '../../utils/utils';
 import CustomShaderMaterial from 'three-custom-shader-material'
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { Environment, OrbitControls } from '@react-three/drei';
+import { Environment, MeshReflectorMaterial, OrbitControls } from '@react-three/drei';
 import { mergeVertices } from 'three-stdlib';
 
 const vertexShader = `
@@ -275,7 +275,19 @@ function Floor() {
           rotation={[-Math.PI / 2, 0, 0]}
         >
           <planeGeometry args={[20, 20]} />
-          <meshPhysicalMaterial side={2} color="grey" />
+          <MeshReflectorMaterial
+            resolution={1024}
+            mirror={0.6}                // full reflection strength
+            mixBlur={0.1}             // subtle blur
+            mixStrength={1.5}         // reflection intensity
+            blur={[300, 100]}         // blur kernel sizes
+            depthScale={1.2}          // depth-based distortion
+            minDepthThreshold={0.8}
+            maxDepthThreshold={1.2}
+            roughness={0.5}           // glossy floor
+            color="#6c6c6c"
+            metalness={0.4}
+        />
         </mesh>
   
         {/* Back wall */}
