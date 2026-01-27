@@ -20,7 +20,7 @@ const Day25Project = () => {
      }, [])
     return (
         <>
-            <PromptHint prompt="Organic Geometry" hint="double tap to change pattern"/>
+            <PromptHint prompt="Organic Geometry" hint="double tap"/>
             <FullScreenShader
                 fragmentPath={`${import.meta.env.BASE_URL}shaders/day25.glsl`}
                 uniforms={{

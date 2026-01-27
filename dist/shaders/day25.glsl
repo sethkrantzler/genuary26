@@ -116,13 +116,11 @@ void main() {
     if (uPattern == 0) {
 
         // Ring parameters
-        float ringCount = 6.0;
-        float baseR = 0.35;
-        float ringSpacing = 0.1;
-        float edge = 0.25;
-
-        // --- NEW: random center color ---
-        float centerMask = 1.0 - smoothstep(baseR, baseR + 0.02, d);
+        highp float ringCount = 6.0;
+        highp float baseR = 0.35;
+        highp float ringSpacing = 0.1;
+        highp float edge = 0.25;
+        highp float centerMask = 1.0 - smoothstep(baseR, baseR + 0.02, d);
         vec3 centerColor = palette(fract(dot(nearestN, vec2(12.9898, 78.233))));
         col += centerMask * centerColor * 1.5;
 
@@ -130,10 +128,10 @@ void main() {
         for (float i = 0.0; i < 6.0; i++) {
             if (i >= ringCount) break;
 
-            float r1 = baseR + i * ringSpacing;
-            float r2 = r1 + ringSpacing * 0.5;
+            highp float r1 = baseR + i * ringSpacing;
+            highp float r2 = r1 + ringSpacing * 0.5;
 
-            float ringMask =
+            highp float ringMask =
                 smoothstep(r1, r1 - edge, d) *
                 (1.0 - smoothstep(r2, r2 - edge, d));
 
@@ -149,12 +147,12 @@ void main() {
     if (uPattern == 1) {
 
         // Ring parameters
-        float ringCount = 6.0;
-        float baseR = 0.65;
-        float ringSpacing = 0.1;
-        float edge = 0.25;
+        highp float ringCount = 6.0;
+        highp float baseR = 0.65;
+        highp float ringSpacing = 0.1;
+        highp float edge = 0.25;
 
-        float centerMask = 1.0 - smoothstep(baseR, baseR +0.02, d);
+        highp float centerMask = 1.0 - smoothstep(baseR, baseR +0.02, d);
         vec3 cInner = vec3(0.62+0.2*sin(0.5*t), 0.5, 0.0);   // orange
         vec3 cOuter = vec3(0.0, 0.6+0.2*sin(0.5*t), 0.3);   // green
 
@@ -166,16 +164,16 @@ void main() {
         for (float i = 0.0; i < 6.0; i++) {
             if (i >= ringCount) break;
 
-            float r1 = baseR + i * ringSpacing;
-            float r2 = r1 + ringSpacing * 0.5;
+            highp float r1 = baseR + i * ringSpacing;
+            highp float r2 = r1 + ringSpacing * 0.5;
 
-            float ringMask =
+            highp float ringMask =
                 smoothstep(r1, r1 - edge, d) *
                 (1.0 - smoothstep(r2, r2 - edge, d));
 
             vec3 ringColor = palette(fract(i * 0.3 + nearestN.x)+0.2*sin(0.5*t));
 
-            col += 10.5 * ringMask * ringColor;
+            col +=  10.5*ringMask * ringColor;
         }
     }
 
@@ -211,6 +209,5 @@ void main() {
             col += 400.0 * ringMask * ringColor;
         }
     }
-
     gl_FragColor = vec4(col, 1.0);
 }
