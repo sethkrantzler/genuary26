@@ -46,6 +46,8 @@ const Day28Project = () => {
       `}</style>
       {style === 0 && <style>{`
             .ascii-box {
+        corner-shape: notch;
+          border-radius: 20px;
           background: black;
           color: white;
           
@@ -65,6 +67,9 @@ const Day28Project = () => {
       .ascii-box {
           font-family: monospace;
           background: black;
+          corner-shape: scoop;
+          border-radius: 30px;
+          font-size: 1.6vmin;
         }
           .h {
                 color: olive;
@@ -108,8 +113,10 @@ const Day28Project = () => {
       {style === 2 && (
   <style>{`
     .ascii-box {
-      color: white;
-      font-family: serif;
+        corner-shape: bevel;
+        border-radius: 50px;
+        color: white;
+        font-family: serif;
     }
 
     .ascii-box span:not(.h):not(.t):not(.m):not(.l) {
