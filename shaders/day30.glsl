@@ -140,7 +140,7 @@ void main() {
         // ------------------------------
         // Mouse influence
         // ------------------------------
-        float rotInfluence  = (1./float(uPattern+1))*(sin(t)*0.0001 + 0.5) * 2.0;   // -1..1 rotation direction & strength
+        float rotInfluence  = (1./float(uPattern+1))*(sin(t)*1.95 + 0.8) * 2.0;   // -1..1 rotation direction & strength
         float sizeInfluence = 0.75;                // 0..1 controls growth
 
         // ------------------------------
@@ -194,7 +194,7 @@ void main() {
         );
 
         // Minimum brightness so early boxes aren't dark
-        baseColor = max(baseColor, vec3(0.25));
+        baseColor = max(baseColor, vec3(0.15));
 
         // Mutation affects saturation & brightness
         float satBoost = mix(0.8, 1.4, m);
