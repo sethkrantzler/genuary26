@@ -17,7 +17,6 @@ const Day29Project = () => {
 
      useEffect(() => {scene.background = new Color('black')}, []);
 
-
      useEffect(() => {
         window.addEventListener("dblclick", handleDoubleClick);
 
