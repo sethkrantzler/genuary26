@@ -131,23 +131,23 @@ void main() {
 
     vec2 p = uv * 2.0;
 
-    const int N = 5;
+    const int N = 70;
 
-    for (int i = 0; i < N*(uPattern+1); i++) {
+    for (int i = 0; i < N; i++) {
         float fi = float(i);
-        float m = length(0.3)* fi / float(N - 1);
+        float m = length(uMouse-0.5)* fi / float(N - 1);
 
         // ------------------------------
         // Mouse influence
         // ------------------------------
-        float rotInfluence  = (1./float(uPattern+1))*(sin(t)*0.0001 + 0.5) * 2.0;   // -1..1 rotation direction & strength
-        float sizeInfluence = 0.75;                // 0..1 controls growth
+        float rotInfluence  = pow(10., float(uPattern+1))*(uMouse.x - 0.5) * 2.0;   // -1..1 rotation direction & strength
+        float sizeInfluence = uMouse.y;                // 0..1 controls growth
 
         // ------------------------------
         // Box size
         // ------------------------------
         float baseSize = 0.25;
-        float sizeGrowth = mix(0.05, 1.5, sizeInfluence);
+        float sizeGrowth = mix(0.05, 10.5, sizeInfluence);
         vec2 halfSize = vec2(baseSize + sizeGrowth * m*m);
 
         // ------------------------------
@@ -162,7 +162,7 @@ void main() {
         // ------------------------------
         vec2 q = p;
         float wn = noise2(q * (3.0 + m * 4.0) + fi * 10.0 + t);
-        q += vec2(cos(wn * 6.2831), sin(wn * 6.2831)) * m * 0.25;
+        q += vec2(cos(wn * 6.2831), sin(wn * 6.2831)) * m * 0.0025;
 
         // Apply rotation
         q = mat2(ca, -sa, sa, ca) * q;
@@ -173,24 +173,19 @@ void main() {
 
         // Shared parameters for shapes
         float radius = halfSize.x;
-        float he = radius*1.5;        // for blobby cross
         float tb = m * 1.5 + 0.2; // for circle wave
-        vec2 wh = halfSize;       // for tunnel
 
-        if (uPattern == 8) {
-            // Stroked circle wave
-            d = sdCircleWave(q, tb, radius);
+         d = sdCircleWave(q, tb, radius);
             line = strokeSDF(d, thickness);
 
-        }
 
         // ------------------------------
         // Color
         // ------------------------------
         vec3 baseColor = vec3(
-            0.5 + 0.5 * sin(fi * 1.7*float(uPattern+1) + 3.3*length(uMouse)),
-            0.5 + 0.5 * sin(fi * 1.2*float(uPattern+1) + 10.1*sin(t*0.5)),
-            0.5 + 0.5 * sin(fi * 2.3*float(uPattern+1) + 15.7*sin(t*0.5))
+            0.5 + 0.5 * sin(fi * 1.7*pow(8., float(uPattern+1)) + 0.3*length(uMouse)),
+            0.5 + 0.5 * sin(fi * 1.2*pow(8., float(uPattern+1)) + 10.1*uMouse.x),
+            0.5 + 0.5 * sin(fi * 2.3*pow(8., float(uPattern+1))+ 20.7*uMouse.y)
         );
 
         // Minimum brightness so early boxes aren't dark
