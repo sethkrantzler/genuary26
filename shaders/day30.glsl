@@ -141,7 +141,7 @@ void main() {
         // Mouse influence
         // ------------------------------
         float rotInfluence  = (1./float(uPattern+1))*(sin(t)*1.95 + 0.8) * 2.0;   // -1..1 rotation direction & strength
-        float sizeInfluence = 0.75;                // 0..1 controls growth
+        float sizeInfluence = 0.1*sin(t)+0.75;                // 0..1 controls growth
 
         // ------------------------------
         // Box size
