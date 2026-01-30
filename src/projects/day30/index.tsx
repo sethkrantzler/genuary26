@@ -5,23 +5,10 @@ import { CompletedSketch, FullScreenShader } from '../../utils/utils';
 import { Color } from 'three';
 
 const Day30Project = () => {
-    const pattern = useRef({ value: 0 });
-  
-    const maxPattern = 2;
-   
-     const handleDoubleClick = () => {
-        pattern.current.value = (pattern.current.value + 1 ) % maxPattern;
-     };
-
-     useEffect(() => {
-        window.addEventListener("dblclick", handleDoubleClick);
-
-        return () => window.removeEventListener("dblclick", handleDoubleClick)
-
-     }, [])
+    const pattern = useRef({ value: 8 });
     return (
         <>
-            <PromptHint prompt="it's not a bug, its a feature" hint="double tap for extreme mode" color="red" />
+            <PromptHint prompt="It's not a bug, it's a feature" color="white" />
             <CompletedSketch day={30}/>
             <FullScreenShader 
                 fragmentPath={`${import.meta.env.BASE_URL}shaders/day30.glsl`}
