@@ -1,0 +1,1 @@
+import{r as e,j as t,c as a,as as s}from"./main-BRigV1yu.js";import{P as o}from"./PromptHint-Bd7p0Qpj.js";const m=()=>{const r=e.useRef({value:8});return t.jsxs(t.Fragment,{children:[t.jsx(o,{prompt:"It's not a bug, it's a feature",color:"white"}),t.jsx(a,{day:30}),t.jsx(s,{fragmentPath:"/genuary26/shaders/day30.glsl",uniforms:{uPattern:r.current}})]})};export{m as default};
