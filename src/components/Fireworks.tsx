@@ -1,7 +1,8 @@
-import { useLoader, useThree } from '@react-three/fiber';
+import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
+import { getVisitedSketches, smoothstepRange } from '../utils/utils';
 
 function createRandomFirework(textures: THREE.Texture[]) {
     const x = (Math.random()-0.5) * 2;
@@ -27,19 +28,48 @@ function createRandomFirework(textures: THREE.Texture[]) {
 
 export function Fireworks() {
   const fireworkFreq = 0.75;
+  const {scene} = useThree();
   const [fireworks, setFireworks] = useState<
     { id: number; config: ReturnType<typeof createRandomFirework> }[]
   >([]);
+  const [showFireworks, setShowFireworks] = useState(false);
 
-  const textures = useLoader(THREE.TextureLoader, [
-    `${import.meta.env.BASE_URL}textures/1.png`,
-    `${import.meta.env.BASE_URL}textures/2.png`,
-    `${import.meta.env.BASE_URL}textures/4.png`,
-    `${import.meta.env.BASE_URL}textures/5.png`,
-    `${import.meta.env.BASE_URL}textures/6.png`,
-    `${import.meta.env.BASE_URL}textures/7.png`,
-    `${import.meta.env.BASE_URL}textures/8.png`,
-  ]);
+    useEffect(() => {
+        const existing = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("visitedSketches="));
+
+        if (!existing) {
+            document.cookie = `visitedSketches=${JSON.stringify([])}; path=/; max-age=31536000`;
+        } else {
+        const visited = getVisitedSketches();
+        if (visited.length === 31) {
+            setShowFireworks(true);
+        }
+        }
+    }, []);
+
+    useFrame(({clock})=> {
+        if (showFireworks) {
+            scene.background = new THREE.Color("black");
+            return;
+        }
+        const b = (Math.sin(clock.elapsedTime*0.25) + 1) / 2;
+        const s = smoothstepRange(b, 0, 1, 0.005, 0.6);
+
+        scene.background = new THREE.Color(s, s, s);      
+    })
+
+    const textures = useLoader(THREE.TextureLoader, [
+        `${import.meta.env.BASE_URL}textures/1.png`,
+        `${import.meta.env.BASE_URL}textures/2.png`,
+        `${import.meta.env.BASE_URL}textures/4.png`,
+        `${import.meta.env.BASE_URL}textures/5.png`,
+        `${import.meta.env.BASE_URL}textures/6.png`,
+        `${import.meta.env.BASE_URL}textures/7.png`,
+        `${import.meta.env.BASE_URL}textures/8.png`,
+    ]);
+
 
   // Spawn fireworks on interval
   useEffect(() => {
@@ -61,7 +91,7 @@ export function Fireworks() {
     setFireworks((prev) => prev.filter((fw) => fw.id !== id));
   };
 
-  if (!textures.length) return null;
+  if (!showFireworks || !textures.length) return null;
 
   return (
     <>
