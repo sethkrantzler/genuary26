@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { FontLoader, TextGeometry } from "three/examples/jsm/Addons.js";
 import gsap from "gsap";
+import { getVisitedSketches } from "../utils/utils";
 
 // Shared matcap for text
 export const sharedMatcapMaterial = new THREE.MeshMatcapMaterial();
@@ -64,20 +65,6 @@ const silverMaterial = new THREE.MeshStandardMaterial({
   roughness: 0.4,
 });
 
-// ---------------------------
-// COOKIE HELPER
-// ---------------------------
-function getVisitedSketches(): number[] {
-  try {
-    const raw = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("visitedSketches="));
-    if (!raw) return [];
-    return JSON.parse(raw.split("=")[1]);
-  } catch {
-    return [];
-  }
-}
 
 export function ProjectLink({ day, onPointerDown }: { day: number; onPointerDown: () => void }) {
   const textRef = useRef<THREE.Group>(null);

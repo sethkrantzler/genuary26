@@ -3,6 +3,22 @@ import { BlendFunction, Effect, EffectComposer, RenderPass, ShaderPass } from 'p
 import { Ref, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 
+
+// ---------------------------
+// COOKIE HELPER
+// ---------------------------
+export function getVisitedSketches(): number[] {
+  try {
+    const raw = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("visitedSketches="));
+    if (!raw) return [];
+    return JSON.parse(raw.split("=")[1]);
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Smoothstep remap helper
  * @param {number} value - The input value

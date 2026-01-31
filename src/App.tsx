@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-ro
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Html } from '@react-three/drei';
+import { getVisitedSketches } from './utils/utils';
 
 const DayCode = () => {
     const { day } = useParams<{ day: string }>();
@@ -104,25 +105,24 @@ function BackButton() {
 }
 
 export function App() {
+
   return (
-    <>
-        <BrowserRouter basename={import.meta.env.MODE === 'production' ? '/genuary26' : '/'}>
-            <BackButton />
-            <Canvas
-                camera={{
-                    fov: 45,
-                    near: 0.1,
-                    far: 200,
-                    position: [0, 0, 5],
-                }}
-                style={{ width: '100%', height: '100%' }}
-            >
-                <Routes>
-                    <Route path="/" element={<Experience />} />
-                    <Route path="/:day" element={<DayCode />} />
-                </Routes>
-            </Canvas>
-          </BrowserRouter>
-        </>
+    <BrowserRouter basename={import.meta.env.MODE === 'production' ? '/genuary26' : '/'}>
+      <BackButton />
+      <Canvas
+        camera={{
+          fov: 45,
+          near: 0.1,
+          far: 200,
+          position: [0, 0, 5],
+        }}
+        style={{ width: '100%', height: '100%' }}
+      >
+        <Routes>
+          <Route path="/" element={<Experience/>} />
+          <Route path="/:day" element={<DayCode />} />
+        </Routes>
+      </Canvas>
+    </BrowserRouter>
   );
 }

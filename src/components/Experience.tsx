@@ -5,13 +5,15 @@ import { ProjectLink, sharedMatcapMaterial } from "./ProjectLink";
 import { MouseIcon } from "./MouseIcon";
 import { useNavigate } from "react-router-dom";
 import { TextGeometry, FontLoader } from "three/examples/jsm/Addons.js";
-import { smoothstepRange } from "../utils/utils";
+import { getVisitedSketches, smoothstepRange } from "../utils/utils";
+import { Html } from "@react-three/drei";
+import { Fireworks } from "./Fireworks";
 
 function Title() {
     const textRef = useRef<THREE.Mesh>(null);
     const [geometry, setGeometry] = useState<TextGeometry | undefined>(undefined);
 
-    const { viewport, scene } = useThree();
+    const { viewport } = useThree();
     
     useEffect(() => {
         const fontLoader = new FontLoader();
@@ -46,11 +48,6 @@ function Title() {
         textRef.current.rotation.y = Math.sin(t * 2) * 0.2;
         textRef.current.rotation.x = Math.sin(t * 1.5) * 0.05;
         textRef.current.rotation.z = Math.cos(t * 1.5) * 0.05;
-    
-        const b = (Math.sin(t*0.25) + 1) / 2;
-        const s = smoothstepRange(b, 0, 1, 0.005, 0.6);
-      
-        scene.background = new THREE.Color(s, s, s);      
     });
     
     const handleClick = () => {
@@ -74,24 +71,14 @@ function Title() {
     );
 }
 
-const Experience = () => {
+const Experience = (showFireworks) => {
   const state = useThree();
-  const { camera, size, viewport } = state;
+  const { camera, size, scene } = state;
   const navigate = useNavigate();
   const [cameraReady, setCameraReady] = useState(false);
   const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(
     navigator.userAgent
   )
-  
-  useEffect(() => {
-      const existing = document.cookie
-          .split("; ")
-          .find((row) => row.startsWith("visitedSketches="));
-
-      if (!existing) {
-          document.cookie = `visitedSketches=${JSON.stringify([])}; path=/; max-age=31536000`;
-      }
-  }, []);
 
   useEffect(() => {
     camera.position.set(0, 0, 5);
@@ -115,6 +102,18 @@ const Experience = () => {
     setCameraReady(true);
 }, [camera, size, state]);
 
+  useFrame(({clock})=> {
+    if (showFireworks) return;
+    const b = (Math.sin(clock.elapsedTime*0.25) + 1) / 2;
+    const s = smoothstepRange(b, 0, 1, 0.005, 0.6);
+
+    scene.background = new THREE.Color(s, s, s);      
+  })
+
+  useEffect(()=> {
+    scene.background = new THREE.Color("black");
+  }, [showFireworks])
+
   const handleClick = (day: number) => {
     setTimeout(() => {
       navigate(`/${day}`);
@@ -125,6 +124,7 @@ const Experience = () => {
     <>
       <directionalLight position={[5, 1, 8]} intensity={1.5} castShadow />
       <ambientLight intensity={0.3} />
+      {showFireworks && <Fireworks />}
       <Title />
       {!isMobile && <MouseIcon />}
       {cameraReady && Array.from({ length: 31 }, (_, i) => (
